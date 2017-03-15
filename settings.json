@@ -1,0 +1,78 @@
+{
+  "name": "Movies",
+  "author": "Tsegaselassie Tadesse <tsegaselassi@gmail.com>",
+  "config": [
+    {"name": "HTTP_PORT", "value":"process.env.HTTP_PORT || 8000", "comment": "HTTP PORT"},
+    {"name": "MONGODB_URL", "value":"'mongodb://localhost/movies'", "comment": "Mongodb URL"},
+    {"name": "SALT_LENGTH", "value":"13", "comment": "SALT VALUE LENGTH"},
+    {"name": "TOKEN_LENGTH", "value":"253", "comment": "TOKEN LENGTH"},
+    {"name": "PAGE_SIZE", "value":"100", "comment": "DEFAULT PAGE SIZE"}
+  ],
+  "models": [
+    {
+      "name": "Movie",
+      "attributes": [
+        {
+          "name": "title",
+          "type": "String",
+          "desc": "The title of the movie.",
+          "example": "Tomorrow Never Dies"
+        },
+        {
+          "name": "genre",
+          "type": "String",
+          "desc": "The category of the movie.",
+          "example": "Action",
+          "isPrivate": true
+        },
+        {
+          "name": "date_created",
+          "type": "Date",
+          "desc": "The date on which the movie entry was created.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        },
+        {
+          "name": "last_modified",
+          "type": "Date",
+          "desc": "The date on which the movie entry was last updated.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        }
+      ],
+      "relations": ["Comment"]
+    },
+    {
+      "name": "Comment",
+      "attributes": [
+        {
+          "name": "title",
+          "type": "String",
+          "desc": "The title of the comment.",
+          "example": "Best Movie Ever!"
+        },
+        {
+          "name": "description",
+          "type": "String",
+          "desc": "The detail of the comment.",
+          "example": "This is one of the best movies I have ever seen."
+        },
+        {
+          "name": "date_created",
+          "type": "Date",
+          "desc": "The date on which the comment entry was created.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        },
+        {
+          "name": "last_modified",
+          "type": "Date",
+          "desc": "The date on which the comment entry was last updated.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        }
+      ],
+      "relations": ["Movie"]
+    }
+  ]
+}

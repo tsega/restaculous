@@ -6,17 +6,16 @@ var mongoose = require('mongoose');
 var validator = require('express-validator');
 
 var config = require('./config');
-
 var router = require('./routes');
 
 // Connect to Mongodb
 mongoose.connect(config.MONGODB_URL);
 // Listen to connection event
-mongoose.connection.on('connected', function mongodbConnectionListener(err){
+mongoose.connection.on('connected', function mongodbConnectionListener(err) {
     debug('Mongodb connected successfully');
 });
-// Handel error event
-mongoose.connection.on('error', function mongodbErrorListener(err){
+// Handle error event
+mongoose.connection.on('error', function mongodbErrorListener(err) {
     debug('Connection to Mongodb Failed!');
 
     // Try to reconnect
