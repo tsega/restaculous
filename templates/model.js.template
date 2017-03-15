@@ -1,0 +1,12 @@
+// Load module dependencies
+var mongoose = require('mongoose');
+
+{{relatedModels}}
+
+// Define {{modelName}} attributes
+var {{modelName}}Schema = mongoose.schema({
+    {{modelSchema}}
+});
+
+// Export {{modelName}} model
+module.exports = mongoose.model('{{modelName}}', {{modelName}}Schema);

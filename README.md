@@ -1,6 +1,6 @@
 # Express API Generator
 
-An opinionated ExpressJs based API generator.
+An opinionated ExpressJs based REST API generator.
 
 ## Features
 The generator produces a fully functional application that can be used as a starting point for build a RESTful API based

@@ -1,0 +1,25 @@
+{
+  "name": "express-api-generator",
+  "version": "0.0.1",
+  "description": "An opinionated ExpressJs based REST API generator.",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/mocha",
+    "start": "DEBUG=express-api-generator node app.js"
+  },
+  "author": "Tsegaselassie Tadesse <tsegaselassi@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "debug": "^2.6.0",
+    "pluralize": "^4.0.0"
+  },
+  "devDependencies": {
+    "apidoc": "^0.17.5",
+    "chai": "^3.5.0",
+    "chi": "0.0.10",
+    "mocha": "^3.2.0"
+  }
+}
