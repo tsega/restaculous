@@ -1,0 +1,138 @@
+// Access Layer for {{modelName}} Data.
+
+/**
+ * Load Module Dependencies.
+ */
+var moment = require('moment');
+var {{modelName}} = require('../models/{{modelNameToLower}}');
+var population = [{
+    {{relatedModels}}
+}];
+
+
+/**
+ * create a new {{modelNameToLower}}.
+ *
+ * @desc  creates a new {{modelNameToLower}} and saves it in the database
+ *
+ * @param {Object}   {{modelNameToLower}}Data  Data for the {{modelName}} to create
+ * @param {Function} cb     Callback for once saving is complete
+ */
+exports.create = function create({{modelNameToLower}}Data, cb) {
+    debug('creating a new {{modelName}}');
+    // Create {{modelName}}
+    var {{modelNameToLower}}Model = new {{modelName}}({{modelNameToLower}}Data);
+    {{modelNameToLower}}Model.save(function save{{modelName}}(err, data) {
+        if (err) {
+            return cb(err);
+        }
+        exports.get({_id: data._id}, function (err, {{modelNameToLower}}) {
+            if (err) {
+                return cb(err);
+            }
+            cb(null, {{modelNameToLower}});
+        });
+    });
+};
+
+
+/**
+ * remove a {{modelNameToLower}}
+ *
+ * @desc  delete data of the {{modelNameToLower}} with the given id
+ *
+ * @param {Object}  query   Query Object
+ * @param {Function} cb Callback for once delete is complete
+ */
+exports.remove = function remove(query, cb) {
+    debug('deleting {{modelNameToLower}}: ', query);
+    {{modelName}}
+        .findOne(query)
+        .populate(population)
+        .exec(function delete{{modelName}}(err, {{modelNameToLower}}) {
+            if (err) {
+                return cb(err);
+            }
+            if (!{{modelNameToLower}}) {
+                return cb(null, {});
+            }
+            {{modelNameToLower}}.remove(function (err) {
+                if (err) {
+                    return cb(err);
+                }
+                cb(null, {{modelNameToLower}});
+            });
+        });
+};
+
+
+/**
+ * update a {{modelNameToLower}}
+ *
+ * @desc  update data of the {{modelNameToLower}} with the given
+ *        id
+ *
+ * @param {Object} query Query object
+ * @param {Object} updates  Update data
+ * @param {Function} cb Callback for once update is complete
+ */
+exports.update = function update(query, updates, cb) {
+    debug('updating {{modelNameToLower}}: ', query);
+    var now = moment().toISOString();
+    updates.last_modified = now;
+    {{modelName}}
+        .findOneAndUpdate(query, updates)
+        .populate(population)
+        .exec(function update{{modelName}}(err, {{modelNameToLower}}) {
+            if (err) {
+                return cb(err);
+            }
+            cb(null, {{modelNameToLower}} || {});
+        });
+};
+
+
+/**
+ * get a {{modelNameToLower}}.
+ *
+ * @desc get a {{modelNameToLower}} with the given id from db
+ *
+ * @param {Object} query Query Object
+ * @param {Function} cb Callback for once fetch is complete
+ */
+exports.get = function get(query, cb) {
+    debug('getting {{modelNameToLower}} ', query);
+    {{modelName}}
+        .findOne(query)
+        .populate(population)
+        .exec(function (err, {{modelNameToLower}}) {
+            if (err) {
+                return cb(err);
+            }
+            cb(null, {{modelNameToLower}} || {});
+        });
+};
+
+
+/**
+ * search the collection of {{modelNamePluralToLower}}
+ *
+ * @desc get a collection of {{modelNamePluralToLower}} from db
+ *
+ * @param {Object} query Query Object
+ * @param {Function} cb Callback for once fetch is complete
+ */
+exports.search = function search(options, cb) {
+    debug('Searching a collection of {{modelNamePluralToLower}}');
+    {{modelName}}.find(options.filter, options.fields)
+        .populate(population)
+        .sort(options.sort)
+        .limit(options.limit)
+        .skip(options.limit * (options.page - 1))
+        .exec(function search{{modelNamePlural}}(err, {{modelNamePluralToLower}}) {
+            if (err) {
+                return cb(err);
+            }
+            return cb(null, {{modelNamePluralToLower}});
+        });
+};

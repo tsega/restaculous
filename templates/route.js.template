@@ -1,0 +1,91 @@
+// Load Module Dependencies
+var express = require('express');
+
+var {{modelName}} = require('../controllers/{{modelNameToLower}}');
+
+// Create a router
+var router = express.Router();
+
+/**
+ * @api {post} /{{modelNamePluralToLower}}/  Create {{modelNameToLower}}
+ * @apiName Create{{modelName}}
+ * @apiGroup {{modelName}}
+ * @apiVersion 0.0.1
+ *
+{{modelCreateParams}}
+ *
+{{modelCreateParamsExample}}
+ *
+{{modelCreateSuccess}}
+ *
+{{modelCreateSuccessExample}}
+ *
+ */
+router.post('/', {{modelName}}.create{{modelName}});
+
+/**
+ * @api {get} /{{modelNamePluralToLower}}/search Search {{modelNamePluralToLower}}
+ * @apiName Get{{modelNamePlural}}
+ * @apiGroup {{modelName}}
+ * @apiVersion 0.0.1
+ *
+{{modelSearchParams}}
+ *
+{{modelSearchParamsExample}}
+ *
+{{modelSearchSuccess}}
+ *
+{{modelSearchSuccessExample}}
+ *
+ */
+router.get('/search', {{modelName}}.search{{modelNamePlural}});
+
+/**
+ * @api {get} /{{modelNamePluralToLower}}/:{{modelNameToLower}}Id Get {{modelNameToLower}}
+ * @apiName Get{{modelName}}
+ * @apiGroup {{modelName}}
+ * @apiVersion 0.0.1
+ *
+ * @apiParam {String} {{modelNameToLower}}Id The ID of the {{modelNameToLower}} to fetch.
+ *
+{{modelSuccess}}
+ *
+{{modelSuccessExample}}
+ *
+ */
+router.get('/:{{modelNameToLower}}Id', {{modelName}}.get{{modelName}});
+
+/**
+ * @api {put} /{{modelNamePluralToLower}}/:{{modelNameToLower}}Id Update {{modelNameToLower}}
+ * @apiName Update{{modelName}}
+ * @apiGroup {{modelName}}
+ * @apiVersion 0.0.1
+ *
+ * @apiParam {String} {{modelNameToLower}}Id The ID of the {{modelNameToLower}} to update.
+ * @apiParam {Object} document An object containing any the fields of the {{modelNameToLower}} to update.
+ *
+{{modelUpdateParamsExample}}
+ *
+{{modelSuccess}}
+ *
+{{modelSuccessExample}}
+ *
+ */
+router.put('/:{{modelNameToLower}}Id', {{modelName}}.update{{modelName}});
+
+/**
+ * @api {delete} /{{modelNamePluralToLower}}/:{{modelNameToLower}}Id Delete {{modelNameToLower}}
+ * @apiName Delete{{modelName}}
+ * @apiGroup {{modelName}}
+ * @apiVersion 0.0.1
+ *
+ * @apiParam {String} {{modelNameToLower}}Id The ID of the {{modelNameToLower}} to delete.
+ *
+{{modelSuccess}}
+ *
+{{modelSuccessExample}}
+ */
+router.delete('/:{{modelNameToLower}}Id', {{modelName}}.remove{{modelName}});
+
+// Export the router
+module.exports = router;
