@@ -58,7 +58,7 @@ workflow.on('generateDals', function generateDals() {
         }
 
         console.log("Done Generating Dals");
-        workflow.emit('generateRoutes');
+        workflow.emit('generateControllers');
     });
 });
 
@@ -94,7 +94,7 @@ workflow.on('generateRoutes', function generateRoutes() {
         }
 
         console.log("Done Generating Routes");
-        //workflow.emit('generateTests');
+        workflow.emit('generateTests');
     });
 });
 
@@ -103,7 +103,7 @@ workflow.on('generateRoutes', function generateRoutes() {
  *
  *  @desc Uses the test generator to create test files in the new application structure.
  */
-workflow.on('generateTest', function generateTest() {
+workflow.on('generateTests', function generateTest() {
     testGenerator.generate(function (err) {
         if (err) {
             // Output Error to console

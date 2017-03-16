@@ -47,7 +47,7 @@ workflow.on('readSettings', function readSettings(cb) {
 /*
  *  readControllerTemplate
  *
- *  Reads the `templates/controller.js.template` file.
+ *  @desc Reads the `templates/controller.js.template` file.
  *
  *  @param {Object[]} models - The models for which the files are to be generated
  *  @param {workflowCallback} cb - The callback to handle end of the models generation process.
@@ -77,49 +77,44 @@ workflow.on('readControllerTemplate', function readControllerTemplate(models, cb
 /*
  *  replaceControllerTokens
  *
- *  Replaces the tokens defined in the template with values for the model.
+ *  @desc Replaces the tokens defined in the template with values for the model.
  *
  *  @param {Object[]} models - The models for which the files are to be generated
  *  @param {Object}  currentModel - The currently selected model for which the token replacement will be done.
  *  @param {string}  controllerFile - The string version of the template file.
  *  @param {workflowCallback} cb - The callback to handle end of the models generation process.
  */
-workflow.on('replaceControllerTokens', function replaceControllerTokens(models, currentModel, modelFile, cb) {
-    var relatedModels = [];
-    var schemaEntries = [];
-
-    // Related models
-    if (currentModel.relations.length) {
-        currentModel.relations.forEach(function (relation) {
-            relatedModels.push("var " + relation + " = require('./" + relation.toLowerCase() + "');");
-            schemaEntries.push(relation.toLowerCase() + ": {type: mongoose.Schema.ObjectId, ref:'" + relation + "'}");
-        });
-
-        modelFile = modelFile.replace(/\{\{relatedModels\}\}/, relatedModels.join("\n"));
-    }
+workflow.on('replaceControllerTokens', function replaceControllerTokens(models, currentModel, controllerFile, cb) {
 
     // Model Name
-    modelFile = modelFile.replace(/\{\{modelName\}\}/g, currentModel.name);
+    controllerFile = controllerFile.replace(/\{\{modelName\}\}/g, currentModel.name);
 
-    // Model Schema
-    var modelSchema = schemaEntries;
+    // Model Name in lower case
+    controllerFile = controllerFile.replace(/\{\{modelNameToLower\}\}/g, currentModel.name.toLowerCase());
 
-    if (currentModel.attributes.length) {
-        currentModel.attributes.forEach(function (attribute) {
-            modelSchema.push(attribute.name + ": {type: " + attribute.type + "}");
-        });
-    }
+    // Model Name plural
+    controllerFile = controllerFile.replace(/\{\{modelNamePlural\}\}/g, pluralize(currentModel.name));
 
-    modelFile = modelFile.replace(/\{\{modelSchema\}\}/, modelSchema.join(",\n"));
+    // Model Name in lower case and plural
+    controllerFile = controllerFile.replace(/\{\{modelNamePluralToLower\}\}/g, pluralize(currentModel.name.toLowerCase()));
 
-    // Create the model file
-    workflow.emit('createModelFile', models, currentModel, modelFile, cb);
+    // Model default field list
+    controllerFile = controllerFile.replace(/\{\{modelDefaultFieldList\}\}/g, defaultFieldList(currentModel));
+
+    // Model create action field validation
+    controllerFile = controllerFile.replace(/\{\{modelCreateFieldValidation\}\}/g, createActionFieldValidation(currentModel));
+
+    // Model update action field validation
+    controllerFile = controllerFile.replace(/\{\{modelUpdateFieldValidation\}\}/g, updateActionFieldValidation(currentModel));
+
+    // Create the controller file
+    workflow.emit('createControllerFile', models, currentModel, controllerFile, cb);
 });
 
 /*
  *  createControllerFile
  *
- *  Creates the actual controller file on disk.
+ *  @desc Creates the actual controller file on disk.
  *
  *  @param {Object[]} models - The models for which the files are to be generated
  *  @param {Object}  currentModel - The currently selected model for which the token replacement will be done.
@@ -128,16 +123,84 @@ workflow.on('replaceControllerTokens', function replaceControllerTokens(models, 
  */
 workflow.on('createControllerFile', function createControllerFile(models, currentModel, controllerFile, cb) {
 
-    fs.writeFile(currentModel.name.toLowerCase() + '.js', controllerFile, opts, function rf(err, data) {
+    fs.writeFile(currentModel.name.toLowerCase() + '_controller.js', controllerFile, opts, function rf(err, data) {
         if (err) {
             // Error handling
             cb(err);
         }
 
         // This is called to iterate through all models
-        workflow.emit('readModelTemplate', models, cb);
+        workflow.emit('readControllerTemplate', models, cb);
     });
 });
+
+/*
+ *  defaultFieldList
+ *
+ *  @desc builds the default field list of the model
+ *
+ *  @param {Object} model - the model for which default field token replacements is generated
+ *  @returns {String} the replacement string to put in documentation
+ */
+function defaultFieldList(model) {
+    var tokenReplacement = [];
+
+    model.attributes.forEach(function (attribute) {
+        tokenReplacement.push("'" + attribute.name + "'");
+    });
+
+    return "[" + tokenReplacement.join(", ") + "]";
+}
+
+/*
+ *  createActionFieldValidation
+ *
+ *  @desc builds the field validation token replacement for the 'Create' action
+ *
+ *  @param {Object} model - the model for which field validation token replacements is generated
+ *  @returns {String} the replacement string to put in documentation
+ *
+ *
+ */
+function createActionFieldValidation(model) {
+    var tokenReplacement = [];
+
+    model.attributes.forEach(function (attribute) {
+        tokenReplacement.push("\t\t\t" + attribute.name + ": {");
+        if (attribute.isOptional) {
+            tokenReplacement.push("\t\t\t\t optional: true,");
+            tokenReplacement.push("\t\t\t\t errorMessage: 'Invalid " + attribute.name + "'");
+        } else {
+            tokenReplacement.push("\t\t\t\t notEmpty: true,");
+            tokenReplacement.push("\t\t\t\t errorMessage: 'Invalid " + attribute.name + "'");
+        }
+        tokenReplacement.push("\t\t\t},");
+    });
+
+    return tokenReplacement.join("\n");
+}
+
+/*
+ *  updateActionFieldValidation
+ *
+ *  @desc builds the field validation token replacement for the 'Update' action
+ *
+ *  @param {Object} model - the model for which field validation token replacements is generated
+ *  @returns {String} the replacement string to put in documentation
+ */
+function updateActionFieldValidation(model) {
+    var tokenReplacement = [];
+
+    model.attributes.forEach(function (attribute) {
+        tokenReplacement.push("\t\t\t" + attribute.name + ": {");
+        tokenReplacement.push("\t\t\t\t optional: true,");
+        tokenReplacement.push("\t\t\t\t errorMessage: 'Invalid " + attribute.name + "'");
+        tokenReplacement.push("\t\t\t},");
+    });
+
+    return tokenReplacement.join("\n");
+}
+
 
 exports.generate = function generateControllers(cb) {
     workflow.emit('readSettings', cb);

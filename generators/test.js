@@ -84,36 +84,24 @@ workflow.on('readTestTemplate', function readTestTemplate(models, cb) {
  *  @param {string}  testFile - The string version of the template file.
  *  @param {workflowCallback} cb - The callback to handle end of the models generation process.
  */
-workflow.on('replaceTestTokens', function replaceTestTokens(models, currentModel, modelFile, cb) {
-    var relatedModels = [];
-    var schemaEntries = [];
-
-    // Related models
-    if (currentModel.relations.length) {
-        currentModel.relations.forEach(function (relation) {
-            relatedModels.push("var " + relation + " = require('./" + relation.toLowerCase() + "');");
-            schemaEntries.push(relation.toLowerCase() + ": {type: mongoose.Schema.ObjectId, ref:'" + relation + "'}");
-        });
-
-        modelFile = modelFile.replace(/\{\{relatedModels\}\}/, relatedModels.join("\n"));
-    }
-
+workflow.on('replaceTestTokens', function replaceTestTokens(models, currentModel, testFile, cb) {
     // Model Name
-    modelFile = modelFile.replace(/\{\{modelName\}\}/g, currentModel.name);
+    testFile = testFile.replace(/\{\{modelName\}\}/g, currentModel.name);
 
-    // Model Schema
-    var modelSchema = schemaEntries;
+    // Model Name in lower case
+    testFile = testFile.replace(/\{\{modelNameToLower\}\}/g, currentModel.name.toLowerCase());
 
-    if (currentModel.attributes.length) {
-        currentModel.attributes.forEach(function (attribute) {
-            modelSchema.push(attribute.name + ": {type: " + attribute.type + "}");
-        });
-    }
+    // Model Name plural
+    testFile = testFile.replace(/\{\{modelNamePlural\}\}/g, pluralize(currentModel.name));
 
-    modelFile = modelFile.replace(/\{\{modelSchema\}\}/, modelSchema.join(",\n"));
+    // Model Name in lower case and plural
+    testFile = testFile.replace(/\{\{modelNamePluralToLower\}\}/g, pluralize(currentModel.name.toLowerCase()));
+
+    // Model sample document from fields
+    testFile = testFile.replace(/\{\{modelFields\}\}/g, modelFields(currentModel));
 
     // Create the model file
-    workflow.emit('createModelFile', models, currentModel, modelFile, cb);
+    workflow.emit('createTestFile', models, currentModel, testFile, cb);
 });
 
 /*
@@ -128,16 +116,35 @@ workflow.on('replaceTestTokens', function replaceTestTokens(models, currentModel
  */
 workflow.on('createTestFile', function createTestFile(models, currentModel, testFile, cb) {
 
-    fs.writeFile(currentModel.name.toLowerCase() + '.js', testFile, opts, function rf(err, data) {
+    fs.writeFile(currentModel.name.toLowerCase() + '_test.js', testFile, opts, function rf(err, data) {
         if (err) {
             // Error handling
             cb(err);
         }
 
         // This is called to iterate through all models
-        workflow.emit('readModelTemplate', models, cb);
+        workflow.emit('readTestTemplate', models, cb);
     });
 });
+
+/*
+ *  modelFields
+ *
+ *  @desc builds the sample document based on the fields of the model
+ *
+ *  @param {Object} model - the model for which default field token replacements is generated
+ *  @returns {String} the replacement string
+ */
+function modelFields(model) {
+    var tokenReplacement = [];
+
+    model.attributes.forEach(function (attribute) {
+        // TODO: check the output to be string or int
+        tokenReplacement.push("\t\t" + attribute.name + ":'" + attribute.example + "'");
+    });
+
+    return tokenReplacement.join(",\n") ;
+}
 
 exports.generate = function generateTests(cb) {
     workflow.emit('readSettings', cb);
