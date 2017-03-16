@@ -98,10 +98,13 @@ workflow.on('replaceDalTokens', function replaceDalTokens(models, currentModel, 
 
     // Model Name
     dalFile = dalFile.replace(/\{\{modelName\}\}/g, currentModel.name);
+
     // Model Name in lower case
     dalFile = dalFile.replace(/\{\{modelNameToLower\}\}/g, currentModel.name.toLowerCase());
+
     // Model Name plural
     dalFile = dalFile.replace(/\{\{modelNamePlural\}\}/g, pluralize(currentModel.name));
+
     // Model Name in lower case and plural
     dalFile = dalFile.replace(/\{\{modelNamePluralToLower\}\}/g, pluralize(currentModel.name.toLowerCase()));
 

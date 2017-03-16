@@ -1,0 +1,128 @@
+// Load Module Dependencies
+var request = require('supertest');
+var chai = require('chai');
+
+var app = require('../app');
+
+var expect = chai.expect;
+
+describe('User Endpoint', function () {
+    var {{modelNameToLower}};
+    var sampleDocument = {
+{{modelFields}}
+    };
+
+    describe('#{{modelName}} POST /{{modelNamePluralToLower}}', function () {
+
+        it('should create a new {{modelNameToLower}}', function (done) {
+
+            request(app)
+                .post('/{{modelNamePluralToLower}}')
+                .set('Content-Type', 'application/json; charset=utf-8')
+                .send(sampleDocument)
+                .expect('Content-Type', 'application/json; charset=utf-8')
+                .expect(201)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    // Set {{modelName}} for later use
+                    {{modelNameToLower}} = res.body;
+
+                    // Assertion tests on response body
+                    expect(res.body._id).to.not.equal('string');
+
+                    done();
+                });
+        });
+    });
+
+    describe('#{{modelName}} GET /{{modelNamePluralToLower}}/:{{modelNameToLower}}Id', function () {
+        it('should get a {{modelNameToLower}}', function (done) {
+
+            request(app)
+                .get('/{{modelNamePluralToLower}}/' + {{modelNameToLower}}._id)
+                .set('Content-Type', 'application/json; charset=utf-8')
+                .expect('Content-Type', 'application/json; charset=utf-8')
+                .expect(200)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    // Assertion tests on response body
+                    expect(res.body._id).to.be.a({{modelNameToLower}}._id);
+
+                    done();
+                });
+        });
+    });
+
+    describe('#{{modelName}} GET /{{modelNamePluralToLower}}/search', function () {
+        it('should get a collection of {{modelNamePluralToLower}}', function (done) {
+
+            request(app)
+                .get('/{{modelNamePluralToLower}}')
+                .set('Content-Type', 'application/json; charset=utf-8')
+                .expect('Content-Type', 'application/json; charset=utf-8')
+                .expect(200)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    // Assertion tests on response body
+                    expect(res.body.options).to.be.a('object');
+                    expect(res.body.result).to.be.a('object');
+
+                    done();
+                });
+        });
+    });
+
+    describe('#{{modelName}} PUT /{{modelNamePluralToLower}}/:{{modelNameToLower}}Id', function () {
+        it('should should update an existing {{modelNameToLower}}', function (done) {
+
+            request(app)
+                .put('/{{modelNamePluralToLower}}/' + {{modelNameToLower}}._id)
+                .set('Content-Type', 'application/json; charset=utf-8')
+                .send(sampleDocument)
+                .expect('Content-Type', 'application/json; charset=utf-8')
+                .expect(200)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    // Assertion tests on response body
+                    expect({{modelNameToLower}}.last_modified).to.not.equal(res.body.last_modified);
+
+                    done();
+                });
+        });
+    });
+
+    describe('#{{modelName}} DELETE /{{modelNamePluralToLower}}/:{{modelNameToLower}}Id', function () {
+        it('should should delete an existing {{modelNameToLower}}', function (done) {
+
+            request(app)
+                .delete('/{{modelNamePluralToLower}}/' + {{modelNameToLower}}._id)
+                .set('Content-Type', 'application/json; charset=utf-8')
+                .expect('Content-Type', 'application/json; charset=utf-8')
+                .expect(200)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    // Assertion tests on response body
+                    expect({{modelNameToLower}}._id).to.equal(res.body._id);
+
+                    done();
+                });
+        });
+    });
+
+});
+

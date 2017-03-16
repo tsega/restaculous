@@ -1,0 +1,279 @@
+// Load Module Dependencies
+var events = require('events');
+
+// Load Search Options library file
+var searchOptions = require('../lib/search_options');
+
+var moment = require('moment');
+
+var {{modelName}}Dal = require('../dal/{{modelName}}');
+
+// Default fields to return on search if not provided
+var defaultFields = {{modelDefaultFieldList}};
+
+/*
+ * Create {{modelName}}
+ *
+ *  1. Validate Data
+ *  2. Create {{modelName}}
+ *  3. Respond
+ */
+exports.create{{modelName}} = function create{{modelName}}(req, res, next) {
+    var workflow = new events.EventEmitter();
+
+    workflow.on('validateData', function validateData() {
+        // Validate {{modelName}} data
+        req.checkBody({
+            {{modelCreateFieldValidation}}
+        });
+
+        var validationErrors = req.validationErrors();
+
+        if (validationErrors) {
+            res.status(400);
+            res.json(validationErrors);
+        } else {
+            // On Success emit create {{modelName}} event
+            workflow.emit('create{{modelName}}');
+        }
+    });
+
+    workflow.on('create{{modelName}}', function create{{modelName}}() {
+        {{modelName}}Dal.create(req.body, function callback(err, {{modelNameToLower}}) {
+            if (err) {
+                return next(err);
+            }
+
+            // On Success emit create profile event
+            workflow.emit('respond', {{modelNameToLower}});
+        });
+    });
+
+    workflow.on('respond', function respond({{modelNameToLower}}) {
+        res.status(201);
+        res.json({{modelNameToLower}});
+    });
+
+    workflow.emit('validateData');
+};
+
+/*
+ * Get {{modelName}}
+ *
+ *  1. Validate {{modelName}} Id
+ *  2. Fetch {{modelName}} form database
+ *  3. Respond
+ */
+exports.get{{modelName}} = function get{{modelName}}(req, res, next) {
+    var workflow = new events.EventEmitter();
+
+    workflow.on('validate{{modelName}}Id', function validate{{modelName}}Id() {
+        // Validate {{modelName}} ID
+        req.checkParams('{{modelNameToLower}}Id', '{{modelName}} ID Invalid!')
+            .isObjectId();
+
+        var validationErrors = req.validationErrors();
+
+        if (validationErrors) {
+            res.status(400);
+            res.json(validationErrors);
+        } else {
+            // On Success emit fetch {{modelName}} event
+            workflow.emit('fetch{{modelName}}', req.params.{{modelNameToLower}}Id);
+        }
+    });
+
+    workflow.on('fetch{{modelName}}', function fetch{{modelName}}({{modelNameToLower}}Id) {
+        {{modelName}}Dal.get({ _id: {{modelNameToLower}}Id }, function (err, {{modelNameToLower}}) {
+            if (err) {
+                // handle error
+                return next(err);
+            }
+
+            workflow.emit('respond', {{modelNameToLower}});
+        });
+    });
+
+    workflow.on('respond', function respond({{modelNameToLower}}) {
+        res.status(200);
+        res.json({{modelNameToLower}});
+    });
+
+    workflow.emit('validate{{modelName}}Id');
+};
+
+/*
+ * Search {{modelNamePlural}}
+ *
+ *  1. Validate Search Query
+ *  2. Fetch {{modelNamePlural}} form database
+ *  3. Respond
+ */
+exports.search{{modelNamePlural}} = function search{{modelNamePlural}}(req, res, next) {
+    var workflow = new events.EventEmitter();
+
+    // Set default search parameter options
+    req.query.filter = searchOptions.getFilter(req);
+    req.query.fields = searchOptions.getFields(req, defaultFields);
+    req.query.page = searchOptions.getPage(req);
+    req.query.limit = searchOptions.getLimit(req);
+    req.query.sort = searchOptions.getSort(req);
+
+    workflow.on('validateSearchQuery', function validateSearchQuery() {
+        // Validate search parameters
+
+        req.checkQuery('filter', 'Filter is empty!')
+            .notEmpty();
+        req.checkQuery('page', 'Page should be a number!')
+            .isInt();
+        req.checkQuery('limit', 'Limit should be a number!')
+            .isInt();
+        req.checkQuery('sort', 'Sort field is empty!')
+            .notEmpty();
+
+        var validationErrors = req.validationErrors();
+
+        if (validationErrors) {
+            res.status(400);
+            res.json(validationErrors);
+        } else {
+            // On Success emit search {{modelNamePlural}} event
+            workflow.emit('search{{modelNamePlural}}');
+        }
+    });
+
+    workflow.on('search{{modelNamePlural}}', function search{{modelNamePlural}}() {
+        var opts = {
+            filter: req.query.filter,
+            fields: req.query.fields,
+            sort: req.query.sort,
+            limit: req.query.limit,
+            page: req.query.page
+        };
+
+        {{modelName}}Dal.search(opts, function (err, {{modelNamePluralToLower}}) {
+            if (err) {
+                // handle error
+                return next(err);
+            }
+
+            workflow.emit('respond', opts, {{modelNamePluralToLower}});
+        });
+    });
+
+    workflow.on('respond', function respond(opts, {{modelNamePluralToLower}}) {
+        res.status(200);
+        res.json({
+            "options": opts,
+            "result":  {{modelNamePluralToLower}}
+        });
+    });
+
+    workflow.emit('validateSearchQuery');
+};
+
+/*
+ * Update {{modelName}}
+ *
+ *  1. Validate {{modelName}} Data
+ *  2. Update {{modelName}} in database
+ *  3. Respond
+ */
+exports.update{{modelName}} = function update{{modelName}}(req, res, next) {
+    var workflow = new events.EventEmitter();
+
+    workflow.on('validate{{modelName}}Data', function validate{{modelName}}Data() {
+        // Validate {{modelName}} id
+        req.checkParams('{{modelNameToLower}}Id', '{{modelName}} ID Invalid!')
+            .isObjectId();
+
+        // Validate update document
+         req.checkBody({
+            {{modelUpdateFieldValidation}}
+         });
+
+        var validationErrors = req.validationErrors();
+
+        if (validationErrors) {
+            res.status(400);
+            res.json(validationErrors);
+        } else {
+            // On Success emit update {{modelName}} event
+            workflow.emit('update{{modelName}}');
+        }
+    });
+
+    workflow.on('update{{modelName}}', function update{{modelName}}() {
+
+        {{modelName}}Dal.update({ _id: req.params.{{modelNameToLower}}Id }, req.body, function (err, {{modelNameToLower}}) {
+            if (err) {
+                // handle error
+                return next(err);
+            }
+
+            workflow.emit('respond', {{modelNameToLower}});
+        });
+    });
+
+    workflow.on('respond', function respond({{modelNameToLower}}) {
+        // TODO: Remove private fields
+        res.status(200);
+        res.json({{modelNameToLower}});
+    });
+
+    workflow.emit('validate{{modelName}}Data');
+};
+
+/*
+ * Remove {{modelName}}
+ *
+ *  1. Validate {{modelName}} Id
+ *  2. Remove {{modelName}} form database
+ *  3. Respond
+ */
+exports.remove{{modelName}} = function remove{{modelName}}(req, res, next) {
+    var workflow = new events.EventEmitter();
+
+    workflow.on('validate{{modelName}}Id', function validate{{modelName}}Id() {
+        // Validate {{modelName}} id
+        req.checkParams('{{modelNameToLower}}Id', '{{modelName}} ID Invalid!')
+            .isObjectId();
+
+        var validationErrors = req.validationErrors();
+
+        if (validationErrors) {
+            res.status(400);
+            res.json(validationErrors);
+        } else {
+            // On Success emit remove {{modelName}} event
+            workflow.emit('remove{{modelName}}');
+        }
+    });
+
+    workflow.on('remove{{modelName}}', function remove{{modelName}}() {
+        {{modelName}}Dal.delete({ _id: req.params.{{modelNameToLower}}Id }, function (err, {{modelNameToLower}}) {
+            if (err) {
+                // handle error
+                return next(err);
+            }
+
+            workflow.emit('respond', {{modelNameToLower}});
+        });
+    });
+
+    workflow.on('respond', function respond({{modelNameToLower}}) {
+        // TODO: Remove private fields
+        res.status(200);
+        res.json({{modelNameToLower}});
+    });
+
+    workflow.emit('validate{{modelName}}Id');
+};
+
+
+// no operation(noop) function
+exports.noop = function noop(req, res, next) {
+    res.json({
+        message: "To Implemented"
+    });
+};
