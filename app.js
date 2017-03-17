@@ -2,10 +2,19 @@
  *  Load Module dependencies
  */
 var events = require('events');
+var fs = require('fs-extra');
+
+/*
+ *  Set file options
+ */
+var opts = {
+    encoding: 'utf8'
+};
 
 /*
  *  Load generators
  */
+var structureGenerator = require('./generators/structure');
 var modelGenerator = require('./generators/model');
 var dalGenerator = require('./generators/dal');
 var controllerGenerator = require('./generators/controller');
@@ -15,17 +24,58 @@ var testGenerator = require('./generators/test');
 /*
  *  Generator high-level flow
  *
- *  1. Copy App Structure
- *  2. Generate Models
- *  3. Generate DALs
- *  4. Generate Controllers
- *  5. Generate Routes
- *  6. Generate Tests
- *  7. Generate Configuration
- *  8. Generate API Docs
- *  9. Generate Codebase Docs
+ *  1. Read settings from file
+ *  2. Copy App Structure
+ *  3. Generate Models
+ *  4. Generate DALs
+ *  5. Generate Controllers
+ *  6. Generate Routes
+ *  7. Generate Tests
+ *  8. Generate Configuration
+ *  9. Generate API Docs
+ *  10. Generate Codebase Docs
  */
 var workflow = new events.EventEmitter();
+var settings = {};
+
+/*
+ *  readSettings
+ *
+ *  @desc Reads the `settings.json` file where models and configuration entries are set.
+ */
+workflow.on('readSettings', function readSettings() {
+    fs.readFile('./settings.json', opts, function rf(err, data) {
+        if (err) {
+            // Error handling
+            cb(err);
+        }
+
+        // Convert the settings file into an object
+        settings = JSON.parse(data);
+
+        workflow.emit('generateStructure');
+    });
+});
+
+/*
+ *  generateStructure
+ *
+ *  @desc Copies the boilerplate applications structure
+ *
+ *  @param {Object} settings - the settings object read from file
+ */
+workflow.on('generateStructure', function generateStructure(){
+    structureGenerator.generate(settings, function (err) {
+        if (err) {
+            // Output Error to console
+            console.log(err);
+        }
+
+        console.log("Done Generating App Structure");
+        workflow.emit('generateModels');
+    });
+});
+
 
 /*
  *  generateModels
@@ -33,7 +83,7 @@ var workflow = new events.EventEmitter();
  *  @desc Uses the model generator to create model files in the new application structure.
  */
 workflow.on('generateModels', function generateModels() {
-    modelGenerator.generate(function (err) {
+    modelGenerator.generate(settings, function (err) {
         if (err) {
             // Output Error to console
             console.log(err);
@@ -51,7 +101,7 @@ workflow.on('generateModels', function generateModels() {
  *  @desc Uses the dal generator to create dal files in the new application structure.
  */
 workflow.on('generateDals', function generateDals() {
-    dalGenerator.generate(function (err) {
+    dalGenerator.generate(settings, function (err) {
         if (err) {
             // Output Error to console
             console.log(err);
@@ -69,7 +119,7 @@ workflow.on('generateDals', function generateDals() {
  *  @desc Uses the dal generator to create dal files in the new application structure.
  */
 workflow.on('generateControllers', function generateControllers() {
-    controllerGenerator.generate(function (err) {
+    controllerGenerator.generate(settings, function (err) {
         if (err) {
             // Output Error to console
             console.log(err);
@@ -87,7 +137,7 @@ workflow.on('generateControllers', function generateControllers() {
  *  @desc Uses the dal generator to create dal files in the new application structure.
  */
 workflow.on('generateRoutes', function generateRoutes() {
-    routeGenerator.generate(function (err) {
+    routeGenerator.generate(settings, function (err) {
         if (err) {
             // Output Error to console
             console.log(err);
@@ -104,7 +154,7 @@ workflow.on('generateRoutes', function generateRoutes() {
  *  @desc Uses the test generator to create test files in the new application structure.
  */
 workflow.on('generateTests', function generateTest() {
-    testGenerator.generate(function (err) {
+    testGenerator.generate(settings, function (err) {
         if (err) {
             // Output Error to console
             console.log(err);
@@ -115,4 +165,4 @@ workflow.on('generateTests', function generateTest() {
     });
 });
 
-workflow.emit("generateModels");
+workflow.emit("readSettings");

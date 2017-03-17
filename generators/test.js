@@ -2,7 +2,8 @@
  *  Load module dependencies
  */
 var events = require('events');
-var fs = require('fs');
+var fs = require('fs-extra');
+var clone = require('clone');
 var pluralize = require('pluralize');
 
 /*
@@ -15,33 +16,13 @@ var opts = {
 /*
  *  Test Generator Flow
  *
- *  1. Read settings file
- *  2. Read test template
- *  3. Replace tokens in test template
- *  4. Create test file
- *  5. Iterate through steps 1-5 until all test files are generated
+ *  1. Read test template
+ *  2. Replace tokens in test template
+ *  3. Create test file
+ *  4. Iterate through steps 1-5 until all test files are generated
  */
 var workflow = new events.EventEmitter();
-
-/*
- *  readSettings
- *
- *  Reads the `settings.json` file where models and configuration entries are set.
- *
- *  @param {workflowCallback} cb - The callback to handle end of the models generation process.
- */
-workflow.on('readSettings', function readSettings(cb) {
-    fs.readFile('./settings.json', opts, function rf(err, data) {
-        if (err) {
-            // Error handling
-            cb(err);
-        }
-
-        var models = JSON.parse(data).models;
-
-        workflow.emit('readTestTemplate', models, cb);
-    });
-});
+var appSettings = {};
 
 
 /*
@@ -53,7 +34,7 @@ workflow.on('readSettings', function readSettings(cb) {
  *  @param {workflowCallback} cb - The callback to handle end of the models generation process.
  */
 workflow.on('readTestTemplate', function readTestTemplate(models, cb) {
-    var allModels = models;
+    var allModels = clone(models);
 
     // Make sure that all models have been generated
     if (allModels.length) {
@@ -116,7 +97,7 @@ workflow.on('replaceTestTokens', function replaceTestTokens(models, currentModel
  */
 workflow.on('createTestFile', function createTestFile(models, currentModel, testFile, cb) {
 
-    fs.writeFile(currentModel.name.toLowerCase() + '_test.js', testFile, opts, function rf(err, data) {
+    fs.writeFile(getTestFileName(currentModel.name), testFile, opts, function rf(err, data) {
         if (err) {
             // Error handling
             cb(err);
@@ -146,8 +127,21 @@ function modelFields(model) {
     return tokenReplacement.join(",\n") ;
 }
 
-exports.generate = function generateTests(cb) {
-    workflow.emit('readSettings', cb);
+/*
+ *  getTestFileName
+ *
+ *  @desc Get the full path of where the test file should be created.
+ *
+ *  @param {String} modelName - the name of the model.
+ *  @returns {String} the full path of the test file.
+ */
+function getTestFileName(modelName){
+    return appSettings.directory + "/test/" + modelName.toLowerCase() + '.js' ;
+}
+
+exports.generate = function generateTests(settings, cb) {
+    appSettings = settings;
+    workflow.emit('readTestTemplate', settings.models, cb);
 };
 
 

@@ -2,7 +2,8 @@
  *  Load module dependencies
  */
 var events = require('events');
-var fs = require('fs');
+var fs = require('fs-extra');
+var clone = require('clone');
 var pluralize = require('pluralize');
 
 /*
@@ -15,33 +16,13 @@ var opts = {
 /*
  *  Dal Generator Flow
  *
- *  1. Read settings file for models
- *  2. Read dal template
- *  3. Replace tokens in dal template
- *  4. Create dal file
- *  5. Iterate through steps 1-5 until all dal files are generated
+ *  1. Read dal template
+ *  2. Replace tokens in dal template
+ *  3. Create dal file
+ *  4. Iterate through steps 1-5 until all dal files are generated
  */
 var workflow = new events.EventEmitter();
-
-/*
- *  readSettings
- *
- *  Reads the `settings.json` file where dals and configuration entries are set.
- *
- *  @param {workflowCallback} cb - The callback to handle end of the dals generation process.
- */
-workflow.on('readSettings', function readSettings(cb) {
-    fs.readFile('./settings.json', opts, function rf(err, data) {
-        if (err) {
-            // Error handling
-            cb(err);
-        }
-
-        var models = JSON.parse(data).models;
-
-        workflow.emit('readDalTemplate', models, cb);
-    });
-});
+var appSettings = {};
 
 
 /*
@@ -53,7 +34,7 @@ workflow.on('readSettings', function readSettings(cb) {
  *  @param {workflowCallback} cb - The callback to handle end of the dals generation process.
  */
 workflow.on('readDalTemplate', function readDalTemplate(models, cb) {
-    var allModels = models;
+    var allModels = clone(models);
 
     // Make sure that all dals have been generated
     if (allModels.length) {
@@ -123,8 +104,7 @@ workflow.on('replaceDalTokens', function replaceDalTokens(models, currentModel, 
  *  @param {workflowCallback} cb - The callback to handle end of the dals generation process.
  */
 workflow.on('createDalFile', function createDalFile(models, currentModel, dalFile, cb) {
-
-    fs.writeFile(currentModel.name.toLowerCase() + '_dal.js', dalFile, opts, function rf(err, data) {
+    fs.writeFile(getDalFileName(currentModel.name), dalFile, opts, function rf(err, data) {
         if (err) {
             // Error handling
             cb(err);
@@ -135,8 +115,21 @@ workflow.on('createDalFile', function createDalFile(models, currentModel, dalFil
     });
 });
 
-exports.generate = function generateDals(cb) {
-    workflow.emit('readSettings', cb);
+/*
+ *  getDalFileName
+ *
+ *  @desc Get the full path of where the DAL file should be created.
+ *
+ *  @param {String} modelName - the name of the model.
+ *  @returns {String} the full path of the DAL file.
+ */
+function getDalFileName(modelName){
+    return appSettings.directory + "/dal/" + modelName.toLowerCase() + '.js' ;
+}
+
+exports.generate = function generateDals(settings, cb) {
+    appSettings = settings;
+    workflow.emit('readDalTemplate', appSettings.models, cb);
 };
 
 
