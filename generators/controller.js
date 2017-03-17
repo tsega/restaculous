@@ -2,7 +2,8 @@
  *  Load module dependencies
  */
 var events = require('events');
-var fs = require('fs');
+var fs = require('fs-extra');
+var clone = require('clone');
 var pluralize = require('pluralize');
 
 /*
@@ -15,34 +16,13 @@ var opts = {
 /*
  *  Controller Generator Flow
  *
- *  1. Read settings file
- *  2. Read controller template
- *  3. Replace tokens in controller template
- *  4. Create controller file
- *  5. Iterate through steps 1-5 until all controller files are generated
+ *  1. Read controller template
+ *  2. Replace tokens in controller template
+ *  3. Create controller file
+ *  4. Iterate through steps 1-5 until all controller files are generated
  */
 var workflow = new events.EventEmitter();
-
-/*
- *  readSettings
- *
- *  Reads the `settings.json` file where models and configuration entries are set.
- *
- *  @param {workflowCallback} cb - The callback to handle end of the models generation process.
- */
-workflow.on('readSettings', function readSettings(cb) {
-    fs.readFile('./settings.json', opts, function rf(err, data) {
-        if (err) {
-            // Error handling
-            cb(err);
-        }
-
-        var models = JSON.parse(data).models;
-
-        workflow.emit('readControllerTemplate', models, cb);
-    });
-});
-
+var appSettings = {};
 
 /*
  *  readControllerTemplate
@@ -53,7 +33,7 @@ workflow.on('readSettings', function readSettings(cb) {
  *  @param {workflowCallback} cb - The callback to handle end of the models generation process.
  */
 workflow.on('readControllerTemplate', function readControllerTemplate(models, cb) {
-    var allModels = models;
+    var allModels = clone(models);
 
     // Make sure that all models have been generated
     if (allModels.length) {
@@ -123,7 +103,7 @@ workflow.on('replaceControllerTokens', function replaceControllerTokens(models, 
  */
 workflow.on('createControllerFile', function createControllerFile(models, currentModel, controllerFile, cb) {
 
-    fs.writeFile(currentModel.name.toLowerCase() + '_controller.js', controllerFile, opts, function rf(err, data) {
+    fs.writeFile(getControllerFileName(currentModel.name), controllerFile, opts, function rf(err, data) {
         if (err) {
             // Error handling
             cb(err);
@@ -133,6 +113,18 @@ workflow.on('createControllerFile', function createControllerFile(models, curren
         workflow.emit('readControllerTemplate', models, cb);
     });
 });
+
+/*
+ *  getControllerFileName
+ *
+ *  @desc Get the full path of where the controller file should be created.
+ *
+ *  @param {String} modelName - the name of the model.
+ *  @returns {String} the full path of the controller file.
+ */
+function getControllerFileName(modelName){
+    return appSettings.directory + "/controllers/" + modelName.toLowerCase() + '.js' ;
+}
 
 /*
  *  defaultFieldList
@@ -202,8 +194,9 @@ function updateActionFieldValidation(model) {
 }
 
 
-exports.generate = function generateControllers(cb) {
-    workflow.emit('readSettings', cb);
+exports.generate = function generateControllers(settings, cb) {
+    appSettings = settings;
+    workflow.emit('readControllerTemplate', appSettings.models, cb);
 };
 
 

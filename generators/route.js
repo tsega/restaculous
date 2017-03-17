@@ -2,7 +2,8 @@
  *  Load module dependencies
  */
 var events = require('events');
-var fs = require('fs');
+var fs = require('fs-extra');
+var clone = require('clone');
 var pluralize = require('pluralize');
 
 /*
@@ -15,33 +16,14 @@ var opts = {
 /*
  *  Route Generator Flow
  *
- *  1. Read settings file
- *  2. Read route template
- *  3. Replace tokens in route template
- *  4. Create route file
- *  5. Iterate through steps 1-5 until all route files are generated
+ *  1. Read route template
+ *  2. Replace tokens in route template
+ *  3. Create route file
+ *  4. Iterate through steps 1-5 until all route files are generated
  */
 var workflow = new events.EventEmitter();
+var appSettings = {};
 
-/*
- *  readSettings
- *
- *  Reads the `settings.json` file where models and configuration entries are set.
- *
- *  @param {workflowCallback} cb - The callback to handle end of the models generation process.
- */
-workflow.on('readSettings', function readSettings(cb) {
-    fs.readFile('./settings.json', opts, function rf(err, data) {
-        if (err) {
-            // Error handling
-            cb(err);
-        }
-
-        var models = JSON.parse(data).models;
-
-        workflow.emit('readRouteTemplate', models, cb);
-    });
-});
 
 /*
  *  readRouteTemplate
@@ -52,7 +34,7 @@ workflow.on('readSettings', function readSettings(cb) {
  *  @param {workflowCallback} cb - The callback to handle end of the models generation process.
  */
 workflow.on('readRouteTemplate', function readRouteTemplate(models, cb) {
-    var allModels = models;
+    var allModels = clone(models);
 
     // Make sure that all models have been generated
     if (allModels.length) {
@@ -136,7 +118,7 @@ workflow.on('replaceRouteTokens', function replaceRouteTokens(models, currentMod
  */
 workflow.on('createRouteFile', function createRouteFile(models, currentModel, routeFile, cb) {
 
-    fs.writeFile(currentModel.name.toLowerCase() + '_route.js', routeFile, opts, function rf(err, data) {
+    fs.writeFile(getRouteFileName(currentModel.name), routeFile, opts, function rf(err, data) {
         if (err) {
             // Error handling
             cb(err);
@@ -395,8 +377,21 @@ function updateParamExampleToken(model) {
     return tokenReplacement.join('\n');
 }
 
-exports.generate = function generateRoutes(cb) {
-    workflow.emit('readSettings', cb);
+/*
+ *  getRouteFileName
+ *
+ *  @desc Get the full path of where the route file should be created.
+ *
+ *  @param {String} modelName - the name of the model.
+ *  @returns {String} the full path of the route file.
+ */
+function getRouteFileName(modelName){
+    return appSettings.directory + "/routes/" + modelName.toLowerCase() + '.js' ;
+}
+
+exports.generate = function generateRoutes(settings, cb) {
+    appSettings = settings;
+    workflow.emit('readRouteTemplate', appSettings.models, cb);
 };
 
 

@@ -2,7 +2,8 @@
  *  Load module dependencies
  */
 var events = require('events');
-var fs = require('fs');
+var fs = require('fs-extra');
+var clone = require('clone');
 var pluralize = require('pluralize');
 
 /*
@@ -15,33 +16,13 @@ var opts = {
 /*
  *  Model Generator Flow
  *
- *  1. Read settings file
- *  2. Read model template
- *  3. Replace tokens in model template
- *  4. Create model file
- *  5. Iterate through steps 1-5 until all model files are generated
+ *  1. Read model template
+ *  2. Replace tokens in model template
+ *  3. Create model file
+ *  4. Iterate through steps 1-5 until all model files are generated
  */
 var workflow = new events.EventEmitter();
-
-/*
- *  readSettings
- *
- *  Reads the `settings.json` file where models and configuration entries are set.
- *
- *  @param {workflowCallback} cb - The callback to handle end of the models generation process.
- */
-workflow.on('readSettings', function readSettings(cb) {
-    fs.readFile('./settings.json', opts, function rf(err, data) {
-        if (err) {
-            // Error handling
-            cb(err);
-        }
-
-        var models = JSON.parse(data).models;
-
-        workflow.emit('readModelTemplate', models, cb);
-    });
-});
+var appSettings = {};
 
 
 /*
@@ -53,7 +34,7 @@ workflow.on('readSettings', function readSettings(cb) {
  *  @param {workflowCallback} cb - The callback to handle end of the models generation process.
  */
 workflow.on('readModelTemplate', function readModelTemplate(models, cb) {
-    var allModels = models;
+    var allModels = clone(models);
 
     // Make sure that all models have been generated
     if (allModels.length) {
@@ -128,7 +109,7 @@ workflow.on('replaceModelTokens', function replaceModelTokens(models, currentMod
  */
 workflow.on('createModelFile', function createModelFile(models, currentModel, modelFile, cb) {
 
-    fs.writeFile(currentModel.name.toLowerCase() + '.js', modelFile, opts, function rf(err, data) {
+    fs.writeFile(getModelFileName(currentModel.name), modelFile, opts, function rf(err, data) {
         if (err) {
             // Error handling
             cb(err);
@@ -139,8 +120,21 @@ workflow.on('createModelFile', function createModelFile(models, currentModel, mo
     });
 });
 
-exports.generate = function generateModels(cb) {
-    workflow.emit('readSettings', cb);
+/*
+ *  getModelFileName
+ *
+ *  @desc Get the full path of where the model file should be created.
+ *
+ *  @param {String} modelName - the name of the model.
+ *  @returns {String} the full path of the model file.
+ */
+function getModelFileName(modelName){
+    return appSettings.directory + "/models/" + modelName.toLowerCase() + '.js' ;
+}
+
+exports.generate = function generateModels(settings, cb) {
+    appSettings = settings;
+    workflow.emit('readModelTemplate', appSettings.models, cb);
 };
 
 
