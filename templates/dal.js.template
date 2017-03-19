@@ -2,9 +2,9 @@
 var moment = require('moment');
 var debug = require('debug');
 var {{modelName}} = require('../models/{{modelNameToLower}}');
-var population = [{
+var population = [
 {{relatedModels}}
-}];
+];
 
 
 /**

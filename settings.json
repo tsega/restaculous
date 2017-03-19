@@ -1,8 +1,12 @@
 {
   "name": "Movies",
-  "description": "A Movie show API application.",
+  "description": "A REST API endpoint for a Movie streaming app.",
   "author": "Tsegaselassie Tadesse <tsegaselassi@gmail.com>",
   "directory": "/Users/tsega/Projects/gebeya/movies-api",
+  "repository": {
+    "type": "git",
+    "url": "http://git.gebeya.com/tsega/movie-api.git"
+  },
   "config": [
     {"name": "HTTP_PORT", "value":"process.env.HTTP_PORT || 8000", "comment": "HTTP PORT"},
     {"name": "MONGODB_URL", "value":"'mongodb://localhost/movies'", "comment": "Mongodb URL"},
@@ -19,7 +23,7 @@
           "name": "title",
           "type": "String",
           "desc": "The title of the movie.",
-          "example": "Tomorrow Never Dies"
+          "example": "Forest Gump"
         },
         {
           "name": "genre",
@@ -43,22 +47,25 @@
           "isAuto": true
         }
       ],
-      "relations": ["Comment"]
+      "relations": [{
+        "name": "Actor",
+        "referenceType": "multiple"
+      }]
     },
     {
-      "name": "Comment",
+      "name": "Actor",
       "attributes": [
         {
-          "name": "title",
+          "name": "firstName",
           "type": "String",
-          "desc": "The title of the comment.",
-          "example": "Best Movie Ever!"
+          "desc": "The first name of the actor.",
+          "example": "Tom"
         },
         {
-          "name": "description",
+          "name": "lastName",
           "type": "String",
-          "desc": "The detail of the comment.",
-          "example": "This is one of the best movies I have ever seen."
+          "desc": "The last name of the actor.",
+          "example": "Hanks"
         },
         {
           "name": "date_created",
@@ -75,7 +82,39 @@
           "isAuto": true
         }
       ],
-      "relations": ["Movie"]
+      "relations": [{
+        "name": "Movie",
+        "referenceType": "multiple"
+      }]
+    },
+    {
+      "name": "Playlist",
+      "attributes": [
+        {
+          "name": "name",
+          "type": "String",
+          "desc": "The name of the playlist.",
+          "example": "Classic Movies"
+        },
+        {
+          "name": "date_created",
+          "type": "Date",
+          "desc": "The date on which the comment entry was created.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        },
+        {
+          "name": "last_modified",
+          "type": "Date",
+          "desc": "The date on which the comment entry was last updated.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        }
+      ],
+      "relations": [{
+        "name": "Movie",
+        "referenceType": "multiple"
+      }]
     }
   ]
 }
