@@ -1,9 +1,12 @@
 // Load Module Dependencies
 var express = require('express');
 var bodyParser = require('body-parser');
-var debug = require('debug')('gebeya-api');
+var debug = require('debug');
 var mongoose = require('mongoose');
 var validator = require('express-validator');
+
+// Load Custom Validator library
+var customValidator = require('./lib/custom_validator');
 
 var config = require('./config');
 var router = require('./routes');
@@ -29,6 +32,9 @@ app.use(bodyParser.json());
 
 // Set Validator
 app.use(validator());
+
+// Set Custom Validation
+app.use(customValidator());
 
 // Set Routes
 router(app);

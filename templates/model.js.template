@@ -4,8 +4,8 @@ var mongoose = require('mongoose');
 {{relatedModels}}
 
 // Define {{modelName}} attributes
-var {{modelName}}Schema = mongoose.schema({
-    {{modelSchema}}
+var {{modelName}}Schema = mongoose.Schema({
+{{modelSchema}}
 });
 
 // Export {{modelName}} model

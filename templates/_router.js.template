@@ -1,0 +1,9 @@
+// Load Module Dependencies
+var express = require('express');
+
+{{requireRoutes}}
+
+// Export Router Initializer
+module.exports = function iniRouter(app) {
+{{initializeRoutes}}
+};

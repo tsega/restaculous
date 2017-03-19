@@ -1,5 +1,5 @@
 // Load Module Dependencies
 
 module.exports = {
-    {{configSettings}}
+{{configSettings}}
 };

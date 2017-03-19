@@ -1,12 +1,11 @@
 // Load Module Dependencies
 var request = require('supertest');
-var chai = require('chai');
+var expect = require('chai').expect;
 
+// Load application
 var app = require('../app');
 
-var expect = chai.expect;
-
-describe('User Endpoint', function () {
+describe('{{modelName}} Endpoint', function () {
     var {{modelNameToLower}};
     var sampleDocument = {
 {{modelFields}}
@@ -52,7 +51,7 @@ describe('User Endpoint', function () {
                     }
 
                     // Assertion tests on response body
-                    expect(res.body._id).to.be.a({{modelNameToLower}}._id);
+                    expect(res.body._id).to.equal({{modelNameToLower}}._id.toString());
 
                     done();
                 });
@@ -63,7 +62,7 @@ describe('User Endpoint', function () {
         it('should get a collection of {{modelNamePluralToLower}}', function (done) {
 
             request(app)
-                .get('/{{modelNamePluralToLower}}')
+                .get('/{{modelNamePluralToLower}}/search')
                 .set('Content-Type', 'application/json; charset=utf-8')
                 .expect('Content-Type', 'application/json; charset=utf-8')
                 .expect(200)
@@ -73,8 +72,8 @@ describe('User Endpoint', function () {
                     }
 
                     // Assertion tests on response body
-                    expect(res.body.options).to.be.a('object');
-                    expect(res.body.result).to.be.a('object');
+                    expect(res.body.options).to.be.an('object');
+                    expect(res.body.result).to.be.an('array');
 
                     done();
                 });
@@ -82,7 +81,7 @@ describe('User Endpoint', function () {
     });
 
     describe('#{{modelName}} PUT /{{modelNamePluralToLower}}/:{{modelNameToLower}}Id', function () {
-        it('should should update an existing {{modelNameToLower}}', function (done) {
+        it('should update an existing {{modelNameToLower}}', function (done) {
 
             request(app)
                 .put('/{{modelNamePluralToLower}}/' + {{modelNameToLower}}._id)
@@ -104,7 +103,7 @@ describe('User Endpoint', function () {
     });
 
     describe('#{{modelName}} DELETE /{{modelNamePluralToLower}}/:{{modelNameToLower}}Id', function () {
-        it('should should delete an existing {{modelNameToLower}}', function (done) {
+        it('should delete an existing {{modelNameToLower}}', function (done) {
 
             request(app)
                 .delete('/{{modelNamePluralToLower}}/' + {{modelNameToLower}}._id)

@@ -71,7 +71,7 @@ workflow.on('replaceDalTokens', function replaceDalTokens(models, currentModel, 
     // Related dals
     if (currentModel.relations.length) {
         currentModel.relations.forEach(function (relation) {
-            relatedModels.push(" path: " + relation.toLowerCase());
+            relatedModels.push("\tpath: '" + relation.toLowerCase() + "'");
         });
 
         dalFile = dalFile.replace(/\{\{relatedModels\}\}/, relatedModels.join(",\n"));

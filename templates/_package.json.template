@@ -1,14 +1,18 @@
 {
-  "name": "gebeya-api",
-  "version": "1.0.0",
-  "description": "",
+  "name": "{{appName}}-api",
+  "version": "0.0.1",
+  "description": "{{appDescription}}",
+  "repository": {
+    "type": "",
+    "url": ""
+  },
   "main": "app.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha",
-    "start": "DEBUG=gebeya* nodemon app.js",
+    "start": "DEBUG={{appName}}* nodemon app.js",
     "build-docs": "./node_modules/.bin/apidoc -i ./routes -o ./docs"
   },
   "author": "",
