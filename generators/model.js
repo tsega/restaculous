@@ -87,7 +87,7 @@ workflow.on('replaceModelTokens', function replaceModelTokens(models, currentMod
 
     if (currentModel.attributes.length) {
         currentModel.attributes.forEach(function (attribute) {
-            modelSchema.push(attribute.name + ": {type: " + attribute.type + "}");
+            modelSchema.push("\t\t" + attribute.name + ": {type: " + attribute.type + "}");
         });
     }
 

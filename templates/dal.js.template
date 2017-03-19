@@ -1,12 +1,9 @@
-// Access Layer for {{modelName}} Data.
-
-/**
- * Load Module Dependencies.
- */
+// Load Module Dependencies.
 var moment = require('moment');
+var debug = require('debug');
 var {{modelName}} = require('../models/{{modelNameToLower}}');
 var population = [{
-    {{relatedModels}}
+{{relatedModels}}
 }];
 
 
@@ -81,7 +78,7 @@ exports.update = function update(query, updates, cb) {
     var now = moment().toISOString();
     updates.last_modified = now;
     {{modelName}}
-        .findOneAndUpdate(query, updates)
+        .findOneAndUpdate(query, updates, {new: true}) // option to return the new document
         .populate(population)
         .exec(function update{{modelName}}(err, {{modelNameToLower}}) {
             if (err) {

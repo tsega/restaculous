@@ -1,5 +1,6 @@
 {
   "name": "Movies",
+  "description": "A Movie show API application.",
   "author": "Tsegaselassie Tadesse <tsegaselassi@gmail.com>",
   "directory": "/Users/tsega/Projects/gebeya/movies-api",
   "config": [
@@ -7,7 +8,8 @@
     {"name": "MONGODB_URL", "value":"'mongodb://localhost/movies'", "comment": "Mongodb URL"},
     {"name": "SALT_LENGTH", "value":"13", "comment": "SALT VALUE LENGTH"},
     {"name": "TOKEN_LENGTH", "value":"253", "comment": "TOKEN LENGTH"},
-    {"name": "PAGE_SIZE", "value":"100", "comment": "DEFAULT PAGE SIZE"}
+    {"name": "MAX_PAGE_SIZE", "value":"100", "comment": "DEFAULT PAGE SIZE"},
+    {"name": "DEFAULT_SORT", "value":"'last_updated'", "comment": "DEFAULT SORT FIELD"}
   ],
   "models": [
     {

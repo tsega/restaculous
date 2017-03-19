@@ -251,7 +251,7 @@ exports.remove{{modelName}} = function remove{{modelName}}(req, res, next) {
     });
 
     workflow.on('remove{{modelName}}', function remove{{modelName}}() {
-        {{modelName}}Dal.delete({ _id: req.params.{{modelNameToLower}}Id }, function (err, {{modelNameToLower}}) {
+        {{modelName}}Dal.remove({ _id: req.params.{{modelNameToLower}}Id }, function (err, {{modelNameToLower}}) {
             if (err) {
                 // handle error
                 return next(err);

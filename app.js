@@ -20,6 +20,7 @@ var dalGenerator = require('./generators/dal');
 var controllerGenerator = require('./generators/controller');
 var routeGenerator = require('./generators/route');
 var testGenerator = require('./generators/test');
+var baseGenerator = require('./generators/base');
 
 /*
  *  Generator high-level flow
@@ -161,8 +162,25 @@ workflow.on('generateTests', function generateTest() {
         }
 
         console.log("Done Generating Tests");
-        //workflow.emit('generateConfig');
+        workflow.emit('generateBase');
     });
 });
+
+/*
+ *  generateBase
+ *
+ *  @desc Uses the base generator to create config/index.js and routes/index.js files in the new application structure.
+ */
+workflow.on('generateBase', function generateBase() {
+    baseGenerator.generate(settings, function (err) {
+        if (err) {
+            // Output Error to console
+            console.log(err);
+        }
+
+        console.log("Done Generating config/index.js, routes/index.js and package.json");
+    });
+});
+
 
 workflow.emit("readSettings");
