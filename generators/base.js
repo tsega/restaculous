@@ -187,6 +187,8 @@ workflow.on('replacePackageTokens', function replacePackageTokens(packageFile, c
 
     packageFile = packageFile.replace(/\{\{appName\}\}/g, appName);
     packageFile = packageFile.replace(/\{\{appDescription\}\}/g, appDescription);
+    packageFile = packageFile.replace(/\{\{repositoryType\}\}/g, appSettings.repository.type);
+    packageFile = packageFile.replace(/\{\{repositoryAddress\}\}/g, appSettings.repository.url);
 
     // Create the dal file
     workflow.emit('createPackageFile',packageFile, cb);

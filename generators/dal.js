@@ -71,7 +71,7 @@ workflow.on('replaceDalTokens', function replaceDalTokens(models, currentModel, 
     // Related dals
     if (currentModel.relations.length) {
         currentModel.relations.forEach(function (relation) {
-            relatedModels.push("\tpath: '" + relation.toLowerCase() + "'");
+            relatedModels.push(getRelatedModelPath(relation));
         });
 
         dalFile = dalFile.replace(/\{\{relatedModels\}\}/, relatedModels.join(",\n"));
@@ -114,6 +114,22 @@ workflow.on('createDalFile', function createDalFile(models, currentModel, dalFil
         workflow.emit('readDalTemplate', models, cb);
     });
 });
+
+/*
+ *  getRelatedModelPath
+ *
+ *  @desc Get the path entry for related models to use in populate() method.
+ *
+ *  @param {Object} relation - the object containing the name of the related model and its reference type
+ *  @return {String} - the path token describing how to populate the related model.
+ */
+function getRelatedModelPath(relation){
+    if(relation.referenceType == "multiple"){
+        return "\t{ path: '" + pluralize(relation.name.toLowerCase()) + "', options: { limit: 10 }}";
+    } else {
+        return "\t{ path: '" + relation.name.toLowerCase() + "'}";
+    }
+}
 
 /*
  *  getDalFileName

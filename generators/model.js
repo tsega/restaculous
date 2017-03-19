@@ -72,8 +72,8 @@ workflow.on('replaceModelTokens', function replaceModelTokens(models, currentMod
     // Related models
     if (currentModel.relations.length) {
         currentModel.relations.forEach(function (relation) {
-            relatedModels.push("var " + relation + " = require('./" + relation.toLowerCase() + "');");
-            schemaEntries.push(relation.toLowerCase() + ": {type: mongoose.Schema.ObjectId, ref:'" + relation + "'}");
+            relatedModels.push("var " + relation.name + " = require('./" + relation.name.toLowerCase() + "');");
+            schemaEntries.push(getRelatedModelSchemaEntry(relation));
         });
 
         modelFile = modelFile.replace(/\{\{relatedModels\}\}/, relatedModels.join("\n"));
@@ -119,6 +119,23 @@ workflow.on('createModelFile', function createModelFile(models, currentModel, mo
         workflow.emit('readModelTemplate', models, cb);
     });
 });
+
+/*
+ *  relatedModelSchemaEntry
+ *
+ *  @desc Build the token for the related model schema entry, i.e. single reference vs. multiple reference.
+ *
+ *  @param {Object} relation - an object with the name of the related field and its reference type.
+ *  @return {String} the token replace for establishing a relationship between the models.
+ */
+function getRelatedModelSchemaEntry(relation){
+    if(relation.referenceType == 'multiple'){
+        // enclose in an array
+        return pluralize(relation.name.toLowerCase()) + ": [{type: mongoose.Schema.ObjectId, ref:'" + relation.name + "'}]";
+    } else {
+        return relation.name.toLowerCase() + ": {type: mongoose.Schema.ObjectId, ref:'" + relation.name + "'}";
+    }
+}
 
 /*
  *  getModelFileName
