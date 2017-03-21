@@ -12,12 +12,12 @@ The generator produces a fully functional application that can be used as a star
 on [NodeJs](https://nodejs.org), [ExpressJs](http://expressjs.com) and [MongoDB](https://www.mongodb.com/).
 
 The application generated has the following features:
-
-  - Token based **Authentication** and **Authorization**
-  - Full tested API endpoints with **CRUD** operations
-  - Automatically generated API documentation
   
-
+  - [x] Fully tested API endpoints with **CRUD** operations
+  - [ ] Token based **Authentication** and **Authorization**
+  - [ ] Automatically generate API documentation
+  - [ ] Linting of source to ensure poper code formatting
+  
 ## Structure
 The generate application structure looks as follows.
 ```
