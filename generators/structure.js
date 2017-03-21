@@ -27,7 +27,7 @@ var workflow = new events.EventEmitter();
  *  @param {workflowCallback} cb - The callback to handle end of the copying process.
  */
 workflow.on('copyStructure', function copyStructure(settings, cb) {
-    fs.copy('./structure', settings.directory, function done(err) {
+    fs.copy(__dirname + '/../structure', settings.directory, function done(err) {
         if (err) {
             // Error handling
             cb(err);
