@@ -1,6 +1,11 @@
-# Express API Generator
+# Rest-a-culous
 
 An opinionated ExpressJs based REST API generator.
+
+## Installation
+To use the generator simply install it globally using NPM:
+
+`npm install -g restaculous`
 
 ## Features
 The generator produces a fully functional application that can be used as a starting point for build a RESTful API based
@@ -32,4 +37,209 @@ The generate application structure looks as follows.
  |--README.md               # an introductory text about the application
 ```
 
-## Commands
+## Generate from a `settings.json` file
+You can generate an entire application by simply supplying a **json** settings file in the following format.
+
+```json
+{
+  "name": "[name of the application]", 
+  "description": "[small description about the application]",
+  "author": "[author name] <author email>",
+  "directory": "[the directory where to output the new application]",
+  "repository": {
+    "type": "[repository type]",
+    "url": "[repository address]"
+  },
+  "config": [
+    {
+    "name": "[name of the configuration]", 
+    "value":"[value of the configuration]", 
+    "comment": "[short comment about the config]"
+    }
+  ],
+  "models": [
+    {
+      "name": "[model name(capitalized)]",
+      "attributes": [
+        {
+          "name": "[name of the attribute]",
+          "type": "[the data type of the attribute]",
+          "desc": "[a small description about the attribute]",
+          "example": "[an example of the attribute]",
+          "isPrivate": "[indicates the attribute will not be returned, e.g. password (optional)]",
+          "isAuto": "[indicates that the value for the attribute will be generated automatically, e.g. date_created (optional)]"
+        }
+      ],
+      "relations": [{
+        "name": "[name of a related model(capitalized)]",
+        "referenceType": "multiple"
+      }]
+    }
+  ]
+}
+```
+
+Here is an example `settings.json` file:
+
+```json
+{
+  "name": "Movies",
+  "description": "A REST API endpoint for a Movie streaming app.",
+  "author": "Tsegaselassie Tadesse <tsegaselassi@gmail.com>",
+  "directory": "/Users/tsega/Projects/movies-api-tmp",
+  "repository": {
+    "type": "git",
+    "url": "http://git.gebeya.com/tsega/movie-api.git"
+  },
+  "config": [
+    {"name": "HTTP_PORT", "value":"process.env.HTTP_PORT || 8000", "comment": "HTTP PORT"},
+    {"name": "MONGODB_URL", "value":"'mongodb://localhost/movies'", "comment": "Mongodb URL"},
+    {"name": "SALT_LENGTH", "value":"13", "comment": "SALT VALUE LENGTH"},
+    {"name": "TOKEN_LENGTH", "value":"253", "comment": "TOKEN LENGTH"},
+    {"name": "MAX_PAGE_SIZE", "value":"100", "comment": "DEFAULT PAGE SIZE"},
+    {"name": "DEFAULT_SORT", "value":"'last_updated'", "comment": "DEFAULT SORT FIELD"}
+  ],
+  "models": [
+    {
+      "name": "Movie",
+      "attributes": [
+        {
+          "name": "title",
+          "type": "String",
+          "desc": "The title of the movie.",
+          "example": "Forest Gump"
+        },
+        {
+          "name": "genre",
+          "type": "String",
+          "desc": "The category of the movie.",
+          "example": "Action",
+          "isPrivate": true
+        },
+        {
+          "name": "date_created",
+          "type": "Date",
+          "desc": "The date on which the movie entry was created.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        },
+        {
+          "name": "last_modified",
+          "type": "Date",
+          "desc": "The date on which the movie entry was last updated.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        }
+      ],
+      "relations": [{
+        "name": "Actor",
+        "referenceType": "multiple"
+      }]
+    },
+    {
+      "name": "Actor",
+      "attributes": [
+        {
+          "name": "firstName",
+          "type": "String",
+          "desc": "The first name of the actor.",
+          "example": "Tom"
+        },
+        {
+          "name": "lastName",
+          "type": "String",
+          "desc": "The last name of the actor.",
+          "example": "Hanks"
+        },
+        {
+          "name": "date_created",
+          "type": "Date",
+          "desc": "The date on which the comment entry was created.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        },
+        {
+          "name": "last_modified",
+          "type": "Date",
+          "desc": "The date on which the comment entry was last updated.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        }
+      ],
+      "relations": [{
+        "name": "Movie",
+        "referenceType": "multiple"
+      }]
+    },
+    {
+      "name": "Playlist",
+      "attributes": [
+        {
+          "name": "name",
+          "type": "String",
+          "desc": "The name of the playlist.",
+          "example": "Classic Movies"
+        },
+        {
+          "name": "date_created",
+          "type": "Date",
+          "desc": "The date on which the comment entry was created.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        },
+        {
+          "name": "last_modified",
+          "type": "Date",
+          "desc": "The date on which the comment entry was last updated.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        }
+      ],
+      "relations": [{
+        "name": "Movie",
+        "referenceType": "multiple"
+      }]
+    }
+  ]
+}
+```
+
+> **Note:** All settings fields in the above example are required except the ones identified as being optional. All **configuration entries** are mandatory; a starter `settings.json` file is given below:
+  
+  
+**DON'T FORGET TO REPLACE [app-name]**
+  
+```json
+{
+  "name": "[app-name]",
+  "description": "",
+  "author": "",
+  "directory": "",
+  "repository": {
+    "type": "",
+    "url": ""
+  },
+  "config": [
+    {"name": "HTTP_PORT", "value":"process.env.HTTP_PORT || 8000", "comment": "HTTP PORT"},
+    {"name": "MONGODB_URL", "value":"'mongodb://localhost/[app-name]'", "comment": "Mongodb URL"},
+    {"name": "SALT_LENGTH", "value":"13", "comment": "SALT VALUE LENGTH"},
+    {"name": "TOKEN_LENGTH", "value":"253", "comment": "TOKEN LENGTH"},
+    {"name": "MAX_PAGE_SIZE", "value":"100", "comment": "DEFAULT PAGE SIZE"},
+    {"name": "DEFAULT_SORT", "value":"'last_updated'", "comment": "DEFAULT SORT FIELD"}
+  ],
+  "models": [
+    {
+      "name": "",
+      "attributes": [
+        {
+          "name": "",
+          "type": "",
+          "desc": "",
+          "example": ""
+        }
+      ]
+    }
+  ]
+}
+```
+

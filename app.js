@@ -1,12 +1,16 @@
+#!/usr/bin/env node
+
 /*
  *  Load Module dependencies
  */
 var events = require('events');
 var fs = require('fs-extra');
+var chalk = require('chalk');
 
-/*
- *  Set file options
- */
+// Load config file
+var config = require('./config');
+
+//  Set file options
 var opts = {
     encoding: 'utf8'
 };
@@ -45,17 +49,26 @@ var settings = {};
  *  @desc Reads the `settings.json` file where models and configuration entries are set.
  */
 workflow.on('readSettings', function readSettings() {
-    fs.readFile('./settings.json', opts, function rf(err, data) {
-        if (err) {
-            // Error handling
-            cb(err);
-        }
+    // Get settings file path from the command prompt
+    var filePath = process.argv[2];
 
-        // Convert the settings file into an object
-        settings = JSON.parse(data);
+    if(filePath){
+        fs.readFile(getSettingsFilePath(filePath), opts, function rf(err, data) {
+            if (err) {
+                // Error handling
+                console.log(chalk.red(config.SINGS.error + " " + err.message));
+                return false;
+            }
 
-        workflow.emit('generateStructure');
-    });
+            // Convert the settings file into an object
+            settings = JSON.parse(data);
+
+            workflow.emit('generateStructure');
+        });
+    } else {
+        // Prompt user to supply setting.json file path
+        console.log(chalk.yellow('%s Warning: settings.json file not provided!'), config.SINGS.warning);
+    }
 });
 
 /*
@@ -72,7 +85,7 @@ workflow.on('generateStructure', function generateStructure(){
             console.log(err);
         }
 
-        console.log("Done Generating App Structure");
+        console.log(chalk.green("%s Done Generating App Structure"), config.SINGS.success);
         workflow.emit('generateModels');
     });
 });
@@ -90,7 +103,7 @@ workflow.on('generateModels', function generateModels() {
             console.log(err);
         }
 
-        console.log("Done Generating Models");
+        console.log(chalk.green("%s Done Generating Models"), config.SINGS.success);
         workflow.emit('generateDals');
     });
 });
@@ -108,7 +121,7 @@ workflow.on('generateDals', function generateDals() {
             console.log(err);
         }
 
-        console.log("Done Generating Dals");
+        console.log(chalk.green("%s Done Generating Dals"), config.SINGS.success);
         workflow.emit('generateControllers');
     });
 });
@@ -127,7 +140,7 @@ workflow.on('generateControllers', function generateControllers() {
         }
 
 
-        console.log("Done Generating Controllers");
+        console.log(chalk.green("%s Done Generating Controllers"), config.SINGS.success);
         workflow.emit('generateRoutes');
     });
 });
@@ -144,7 +157,7 @@ workflow.on('generateRoutes', function generateRoutes() {
             console.log(err);
         }
 
-        console.log("Done Generating Routes");
+        console.log(chalk.green("%s Done Generating Routes"), config.SINGS.success);
         workflow.emit('generateTests');
     });
 });
@@ -161,7 +174,7 @@ workflow.on('generateTests', function generateTest() {
             console.log(err);
         }
 
-        console.log("Done Generating Tests");
+        console.log(chalk.green("%s Done Generating Tests"), config.SINGS.success);
         workflow.emit('generateBase');
     });
 });
@@ -178,9 +191,24 @@ workflow.on('generateBase', function generateBase() {
             console.log(err);
         }
 
-        console.log("Done Generating config/index.js, routes/index.js and package.json");
+        console.log(chalk.green("%s Done Generating config/index.js, routes/index.js and package.json"), config.SINGS.success);
     });
 });
 
+
+/*
+ *  getSettingsFilePath
+ *
+ *  @desc Figures out the actual system path to the settings.json file
+ *
+ *  @parma {String} filePath - the file path provided by the user
+ */
+function getSettingsFilePath(filePath){
+    if(filePath.indexOf("/") < 0){
+        return "./" + filePath;
+    } else {
+        return filePath;
+    }
+}
 
 workflow.emit("readSettings");

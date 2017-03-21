@@ -1,8 +1,11 @@
 {
-  "name": "express-api-generator",
-  "version": "0.0.1",
+  "name": "restaculous",
+  "version": "0.7.2",
   "description": "An opinionated ExpressJs based REST API generator.",
   "main": "app.js",
+  "bin": {
+    "restaculous": "./app.js"
+  },
   "directories": {
     "test": "test"
   },
@@ -11,8 +14,13 @@
     "start": "DEBUG=express-api-generator node app.js"
   },
   "author": "Tsegaselassie Tadesse <tsegaselassi@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tsega/restaculous"
+  },
   "license": "MIT",
   "dependencies": {
+    "chalk": "^1.1.3",
     "clone": "^2.1.1",
     "debug": "^2.6.0",
     "fs-extra": "^2.1.2",

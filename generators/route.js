@@ -40,7 +40,7 @@ workflow.on('readRouteTemplate', function readRouteTemplate(models, cb) {
     if (allModels.length) {
         var currentModel = allModels.pop();
 
-        fs.readFile('./templates/route.js.template', opts, function rf(err, routeFile) {
+        fs.readFile(__dirname + '/../templates/route.js.template', opts, function rf(err, routeFile) {
             if (err) {
                 // Error handling
                 cb(err);

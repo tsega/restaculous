@@ -40,7 +40,7 @@ workflow.on('readTestTemplate', function readTestTemplate(models, cb) {
     if (allModels.length) {
         var currentModel = allModels.pop();
 
-        fs.readFile('./templates/test.js.template', opts, function rf(err, testFile) {
+        fs.readFile(__dirname + '/../templates/test.js.template', opts, function rf(err, testFile) {
             if (err) {
                 // Error handling
                 cb(err);

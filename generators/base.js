@@ -37,7 +37,7 @@ var appSettings = {};
  *  @param {workflowCallback} cb - The callback to handle end of the generation process.
  */
 workflow.on('readConfigTemplate', function readConfigTemplate(cb) {
-    fs.readFile('./templates/_config.js.template', opts, function rf(err, configFile) {
+    fs.readFile(__dirname + '/../templates/_config.js.template', opts, function rf(err, configFile) {
         if (err) {
             // Error handling
             cb(err);
@@ -98,7 +98,7 @@ workflow.on('createConfigFile', function createConfigFile(configFile, cb) {
  *  @param {workflowCallback} cb - The callback to handle end of the generation process.
  */
 workflow.on('readRouterTemplate', function readRouterTemplate(cb) {
-    fs.readFile('./templates/_router.js.template', opts, function rf(err, routerFile) {
+    fs.readFile(__dirname + '/../templates/_router.js.template', opts, function rf(err, routerFile) {
         if (err) {
             // Error handling
             cb(err);
@@ -162,7 +162,7 @@ workflow.on('createRouterFile', function createRouterFile(routerFile, cb) {
  *  @param {workflowCallback} cb - The callback to handle end of the generation process.
  */
 workflow.on('readPackageTemplate', function readPackageTemplate(cb) {
-    fs.readFile('./templates/_package.json.template', opts, function rf(err, packageFile) {
+    fs.readFile(__dirname + '/../templates/_package.json.template', opts, function rf(err, packageFile) {
         if (err) {
             // Error handling
             cb(err);
