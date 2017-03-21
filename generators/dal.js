@@ -40,7 +40,7 @@ workflow.on('readDalTemplate', function readDalTemplate(models, cb) {
     if (allModels.length) {
         var currentModel = allModels.pop();
 
-        fs.readFile('./templates/dal.js.template', opts, function rf(err, dalFile) {
+        fs.readFile(__dirname + '/../templates/dal.js.template', opts, function rf(err, dalFile) {
             if (err) {
                 // Error handling
                 cb(err);

@@ -39,7 +39,7 @@ workflow.on('readControllerTemplate', function readControllerTemplate(models, cb
     if (allModels.length) {
         var currentModel = allModels.pop();
 
-        fs.readFile('./templates/controller.js.template', opts, function rf(err, controllerFile) {
+        fs.readFile(__dirname + '/../templates/controller.js.template', opts, function rf(err, controllerFile) {
             if (err) {
                 // Error handling
                 cb(err);
