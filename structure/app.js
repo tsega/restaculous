@@ -12,7 +12,7 @@ var config = require('./config');
 var router = require('./routes');
 
 // Connect to Mongodb
-mongoose.connect(config.MONGODB_URL);
+mongoose.connect(config.MONGODB_URL, { useNewUrlParser: true });
 // Listen to connection event
 mongoose.connection.on('connected', function mongodbConnectionListener(err) {
     debug('Mongodb connected successfully');
