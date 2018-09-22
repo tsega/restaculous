@@ -69,12 +69,15 @@ workflow.on('replaceDalTokens', function replaceDalTokens(models, currentModel, 
     var relatedModels = [];
 
     // Related dals
-    if (currentModel.relations.length) {
+    if (currentModel.relations && currentModel.relations.length) {
         currentModel.relations.forEach(function (relation) {
             relatedModels.push(getRelatedModelPath(relation));
         });
 
         dalFile = dalFile.replace(/\{\{relatedModels\}\}/, relatedModels.join(",\n"));
+    } else {
+        // Simply remove that related models token in the dal file
+        dalFile = dalFile.replace(/\{\{relatedModels\}\}/, "");
     }
 
     // Model Name

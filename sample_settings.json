@@ -1,0 +1,326 @@
+{
+  "name": "SwiftDeskAPI",
+  "description": "A REST API endpoint for Swift Media's Technical Support Desk application.",
+  "author": "Tsegaselassie Tadesse <tsegaselassi@gmail.com>",
+  "directory": "/Users/tsega/projects/lab/restaculous_sample",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tsega/bitw-swiftdesk-api"
+  },
+  "config": [
+    {"name": "HTTP_PORT", "value":"process.env.HTTP_PORT || 8000", "comment": "HTTP PORT"},
+    {"name": "MONGODB_URL", "value":"'mongodb://localhost/swiftdesk'", "comment": "Mongodb URL"},
+    {"name": "SALT_LENGTH", "value":"13", "comment": "SALT VALUE LENGTH"},
+    {"name": "TOKEN_LENGTH", "value":"253", "comment": "TOKEN LENGTH"},
+    {"name": "MAX_PAGE_SIZE", "value":"100", "comment": "DEFAULT PAGE SIZE"},
+    {"name": "DEFAULT_SORT", "value":"'last_updated'", "comment": "DEFAULT SORT FIELD"}
+  ],
+  "models": [
+    {
+      "name": "User",
+      "attributes": [
+        {
+          "name": "first_name",
+          "type": "String",
+          "desc": "The first name of the user.",
+          "example": "Abebe"
+        },
+        {
+          "name": "last_name",
+          "type": "String",
+          "desc": "The last name of the user.",
+          "example": "Kebede"
+        },
+        {
+          "name": "email",
+          "type": "String",
+          "desc": "The email address of the user, will serve as the username for login.",
+          "example": "a.kebede@swiftdesk.com"
+        },
+        {
+          "name": "telephone",
+          "type": "String",
+          "desc": "The telephone number of the user.",
+          "example": "+251911123456"
+        },
+        {
+          "name": "password",
+          "type": "String",
+          "desc": "The password for the user account.",
+          "example": "7His5h@ul6be$ecu8e",
+          "isPrivate": true
+        },
+        {
+          "name": "created_on",
+          "type": "Date",
+          "desc": "The date on which the user account was created.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        },
+        {
+          "name": "modified_on",
+          "type": "Date",
+          "desc": "The date on which the user account was last modified.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        }
+      ],
+      "relations": [{
+        "name": "Role",
+        "referenceType": "single"
+      }]
+    },
+    {
+      "name": "Role",
+      "attributes": [
+        {
+          "name": "name",
+          "type": "String",
+          "desc": "The name of the role.",
+          "example": "Admin"
+        },
+        {
+          "name": "created_on",
+          "type": "Date",
+          "desc": "The date on which the role was created.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        },
+        {
+          "name": "modified_on",
+          "type": "Date",
+          "desc": "The date on which the role was last modified.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        }
+      ]
+    },
+    {
+      "name": "Permission",
+      "attributes": [
+        {
+          "name": "resource",
+          "type": "String",
+          "desc": "The API resoruce to get access to.",
+          "example": "users"
+        },
+        {
+          "name": "actions",
+          "type": "Array",
+          "desc": "The API action(s) allowed to perform on the resource.",
+          "example": ["get", "post", "patch"]
+        },
+        {
+          "name": "created_on",
+          "type": "Date",
+          "desc": "The date on which the user account was created.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        },
+        {
+          "name": "modified_on",
+          "type": "Date",
+          "desc": "The date on which the user account was last modified.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        }
+      ],
+      "relations": [{
+        "name": "Role",
+        "referenceType": "single"
+      }]
+    },
+    {
+      "name": "Location",
+      "attributes": [
+        {
+          "name": "name",
+          "type": "String",
+          "desc": "The name of the location.",
+          "example": "Bole Snap Plaza"
+        },
+        {
+          "name": "latitude",
+          "type": "Number",
+          "desc": "The latitudinal coordinate number of the location.",
+          "example": 8.9898
+        },
+        {
+          "name": "latitude",
+          "type": "Number",
+          "desc": "The latitudinal coordinate number of the location.",
+          "example": 38.7876
+        },
+        {
+          "name": "representatives",
+          "type": "Array",
+          "desc": "The representatives to contact regarding the location.",
+          "example": [{
+            "name": "Girma Belete",
+            "telephone": "+251911123456"
+          }]
+        },
+        {
+          "name": "created_on",
+          "type": "Date",
+          "desc": "The date on which the user account was created.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        },
+        {
+          "name": "modified_on",
+          "type": "Date",
+          "desc": "The date on which the user account was last modified.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        }
+      ]
+    },
+    {
+      "name": "Issue",
+      "attributes": [
+        {
+          "name": "issue_type",
+          "type": "String",
+          "desc": "The type of issue; i.e. related to Kiosk or Tablet.",
+          "example": "kiosk"
+        },
+        {
+          "name": "floor",
+          "type": "String",
+          "desc": "The floor of the building on which the device is located.",
+          "example": "M"
+        },
+        {
+          "name": "direction",
+          "type": "String",
+          "desc": "The direction in which the device is placed on the floor; i.e. left or right.",
+          "example": "left"
+        },
+        {
+          "name": "has_wifi",
+          "type": "Boolean",
+          "desc": "If the device has WiFi access or not.",
+          "example": true
+        },
+        {
+          "name": "wifi_ip",
+          "type": "String",
+          "desc": "The IP address of the WiFi access point, if available.",
+          "example": "192.168.1.1",
+          "optional": true
+        },
+        {
+          "name": "lan_ip",
+          "type": "String",
+          "desc": "The IP address of the LAN port, if available.",
+          "example": "192.168.1.1",
+          "optional": true
+        },
+        {
+          "name": "server_ip",
+          "type": "String",
+          "desc": "The IP address of the server, if available.",
+          "example": "192.168.1.1",
+          "optional": true
+        },
+        {
+          "name": "manual_enabled",
+          "type": "Boolean",
+          "desc": "If the device was to be powered on manually.",
+          "example": true
+        },
+        {
+          "name": "auto_enabled",
+          "type": "Boolean",
+          "desc": "If the device was to be powered on automatically.",
+          "example": false
+        },
+        {
+          "name": "auto_start_enabled",
+          "type": "Boolean",
+          "desc": "If the device was to be powered on automatically.",
+          "example": true
+        },
+        {
+          "name": "access_address",
+          "type": "String",
+          "desc": "The access address of the device.",
+          "example": "b-02-897"
+        },
+        {
+          "name": "has_genuine_windows",
+          "type": "Boolean",
+          "desc": "If the device has genuine windwos operating system installed.",
+          "example": true
+        },
+        {
+          "name": "software_error",
+          "type": "String",
+          "desc": "The error message shown if there is a software error output.",
+          "example": "500: Server Error"
+        },
+        {
+          "name": "was_powered_off",
+          "type": "Boolean",
+          "desc": "If the device was powered off when visited.",
+          "example": true
+        },
+        {
+          "name": "reported_to",
+          "type": "String",
+          "desc": "The person to which the issue was reported first.",
+          "example": "Lema Seyoum"
+        },
+        {
+          "name": "reported_on",
+          "type": "Date",
+          "desc": "The date on which the report of the issue was made.",
+          "example": "2017-02-13T17:19:08.404Z"
+        },
+        {
+          "name": "host_ev_for",
+          "type": "String",
+          "desc": "The host for which the electronic evaluation is setup for.",
+          "example": "Yeka Subcity"
+        },
+        {
+          "name": "repeated_problems",
+          "type": "Array",
+          "desc": "The list of repleated problems reported.",
+          "example": [
+            "The first problem",
+            "The second problem"
+          ]
+        },
+        {
+          "name": "detailed_information",
+          "type": "String",
+          "desc": "The detailed information on the problems reported.",
+          "example": "There is interruption of power on the building."
+        },
+        {
+          "name": "created_on",
+          "type": "Date",
+          "desc": "The date on which the user account was created.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        },
+        {
+          "name": "modified_on",
+          "type": "Date",
+          "desc": "The date on which the user account was last modified.",
+          "example": "2017-02-13T17:19:08.404Z",
+          "isAuto": true
+        }
+      ],
+      "relations": [{
+        "name": "User",
+        "referenceType": "single"
+      },{
+        "name": "Location",
+        "referenceType": "single"
+      }]
+    }
+  ]
+}
