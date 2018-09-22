@@ -70,15 +70,17 @@ workflow.on('replaceModelTokens', function replaceModelTokens(models, currentMod
     var schemaEntries = [];
 
     // Related models
-    if (currentModel.relations.length) {
+    if (currentModel.relations && currentModel.relations.length) {
         currentModel.relations.forEach(function (relation) {
             relatedModels.push("var " + relation.name + " = require('./" + relation.name.toLowerCase() + "');");
             schemaEntries.push(getRelatedModelSchemaEntry(relation));
         });
 
         modelFile = modelFile.replace(/\{\{relatedModels\}\}/, relatedModels.join("\n"));
+    } else {
+        // Simply remove that related models token in the model file
+        modelFile = modelFile.replace(/\{\{relatedModels\}\}/, "");
     }
-
     // Model Name
     modelFile = modelFile.replace(/\{\{modelName\}\}/g, currentModel.name);
 
