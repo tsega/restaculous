@@ -1,6 +1,3 @@
-// Load Module Dependencies
-var _ = require('lodash');
-
 // Load configuration file
 var config = require('../config');
 
