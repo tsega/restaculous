@@ -1,6 +1,5 @@
 // Load Module Dependencies
 var express = require('express');
-var bodyParser = require('body-parser');
 var debug = require('debug');
 var mongoose = require('mongoose');
 var validator = require('express-validator');
@@ -28,7 +27,7 @@ mongoose.connection.on('error', function mongodbErrorListener(err) {
 var app = express();
 
 // Set Middleware
-app.use(bodyParser.json());
+app.use(express.json());
 
 // Set Validator
 app.use(validator());
