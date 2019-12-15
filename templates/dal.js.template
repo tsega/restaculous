@@ -1,5 +1,4 @@
 // Load Module Dependencies.
-var moment = require('moment');
 var debug = require('debug');
 var {{modelName}} = require('../models/{{modelNameToLower}}');
 var population = [
@@ -75,8 +74,7 @@ exports.remove = function remove(query, cb) {
  */
 exports.update = function update(query, updates, cb) {
     debug('updating {{modelNameToLower}}: ', query);
-    var now = moment().toISOString();
-    updates.last_modified = now;
+    updates.last_modified = new Date().toISOString();
     {{modelName}}
         .findOneAndUpdate(query, updates, {new: true}) // option to return the new document
         .populate(population)

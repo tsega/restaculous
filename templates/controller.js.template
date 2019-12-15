@@ -4,8 +4,6 @@ var events = require('events');
 // Load Search Options library file
 var searchOptions = require('../lib/search_options');
 
-var moment = require('moment');
-
 var {{modelName}}Dal = require('../dal/{{modelName}}');
 
 // Default fields to return on search if not provided
