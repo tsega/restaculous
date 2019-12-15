@@ -1,5 +1,4 @@
 // Load Module Dependencies.
-var debug = require('debug');
 var {{modelName}} = require('../models/{{modelNameToLower}}');
 var population = [
 {{relatedModels}}
@@ -15,7 +14,7 @@ var population = [
  * @param {Function} cb     Callback for once saving is complete
  */
 exports.create = function create({{modelNameToLower}}Data, cb) {
-    debug('creating a new {{modelName}}');
+    console.log('creating a new {{modelName}}');
     // Create {{modelName}}
     var {{modelNameToLower}}Model = new {{modelName}}({{modelNameToLower}}Data);
     {{modelNameToLower}}Model.save(function save{{modelName}}(err, data) {
@@ -41,7 +40,7 @@ exports.create = function create({{modelNameToLower}}Data, cb) {
  * @param {Function} cb Callback for once delete is complete
  */
 exports.remove = function remove(query, cb) {
-    debug('deleting {{modelNameToLower}}: ', query);
+    console.log('deleting {{modelNameToLower}}: ', query);
     {{modelName}}
         .findOne(query)
         .populate(population)
@@ -73,7 +72,7 @@ exports.remove = function remove(query, cb) {
  * @param {Function} cb Callback for once update is complete
  */
 exports.update = function update(query, updates, cb) {
-    debug('updating {{modelNameToLower}}: ', query);
+    console.log('updating {{modelNameToLower}}: ', query);
     updates.last_modified = new Date().toISOString();
     {{modelName}}
         .findOneAndUpdate(query, updates, {new: true}) // option to return the new document
@@ -96,7 +95,7 @@ exports.update = function update(query, updates, cb) {
  * @param {Function} cb Callback for once fetch is complete
  */
 exports.get = function get(query, cb) {
-    debug('getting {{modelNameToLower}} ', query);
+    console.log('getting {{modelNameToLower}} ', query);
     {{modelName}}
         .findOne(query)
         .populate(population)
@@ -118,7 +117,7 @@ exports.get = function get(query, cb) {
  * @param {Function} cb Callback for once fetch is complete
  */
 exports.search = function search(options, cb) {
-    debug('Searching a collection of {{modelNamePluralToLower}}');
+    console.log('Searching a collection of {{modelNamePluralToLower}}');
     {{modelName}}.find(options.filter, options.fields)
         .populate(population)
         .sort(options.sort)
