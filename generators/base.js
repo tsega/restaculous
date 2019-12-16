@@ -182,7 +182,7 @@ workflow.on('readPackageTemplate', function readPackageTemplate(cb) {
  *  @param {workflowCallback} cb - The callback to handle end of the dals generation process.
  */
 workflow.on('replacePackageTokens', function replacePackageTokens(packageFile, cb) {
-    var appName = appSettings.name.toLowerCase().replace(" ", "-");
+    var appName = appSettings.name.toLowerCase().replace(/\s/g, "-");
     var appDescription = appSettings.description;
 
     packageFile = packageFile.replace(/\{\{appName\}\}/g, appName);
