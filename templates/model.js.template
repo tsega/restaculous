@@ -6,6 +6,8 @@ var mongoose = require('mongoose');
 // Define {{modelName}} attributes
 var {{modelName}}Schema = mongoose.Schema({
 {{modelSchema}}
+}, {
+  timestamps: true
 });
 
 // Export {{modelName}} model
