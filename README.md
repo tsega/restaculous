@@ -115,20 +115,6 @@ Here is an example `settings.json` file:
           "desc": "The category of the movie.",
           "example": "Action",
           "isPrivate": true
-        },
-        {
-          "name": "date_created",
-          "type": "Date",
-          "desc": "The date on which the movie entry was created.",
-          "example": "2017-02-13T17:19:08.404Z",
-          "isAuto": true
-        },
-        {
-          "name": "last_modified",
-          "type": "Date",
-          "desc": "The date on which the movie entry was last updated.",
-          "example": "2017-02-13T17:19:08.404Z",
-          "isAuto": true
         }
       ],
       "relations": [{
@@ -150,20 +136,6 @@ Here is an example `settings.json` file:
           "type": "String",
           "desc": "The last name of the actor.",
           "example": "Hanks"
-        },
-        {
-          "name": "date_created",
-          "type": "Date",
-          "desc": "The date on which the comment entry was created.",
-          "example": "2017-02-13T17:19:08.404Z",
-          "isAuto": true
-        },
-        {
-          "name": "last_modified",
-          "type": "Date",
-          "desc": "The date on which the comment entry was last updated.",
-          "example": "2017-02-13T17:19:08.404Z",
-          "isAuto": true
         }
       ],
       "relations": [{
@@ -179,20 +151,6 @@ Here is an example `settings.json` file:
           "type": "String",
           "desc": "The name of the playlist.",
           "example": "Classic Movies"
-        },
-        {
-          "name": "date_created",
-          "type": "Date",
-          "desc": "The date on which the comment entry was created.",
-          "example": "2017-02-13T17:19:08.404Z",
-          "isAuto": true
-        },
-        {
-          "name": "last_modified",
-          "type": "Date",
-          "desc": "The date on which the comment entry was last updated.",
-          "example": "2017-02-13T17:19:08.404Z",
-          "isAuto": true
         }
       ],
       "relations": [{
@@ -204,7 +162,9 @@ Here is an example `settings.json` file:
 }
 ```
 
-> **Note:** All settings fields in the above example are required except the ones identified as being optional. All **configuration entries** are mandatory; a starter `settings.json` file is given below:
+> **Notes:**
+ - Timestamp attributes, i.e. `createdAt` and `updatedAt` are automatically added to all models.
+ - All settings fields in the above example are required except the ones identified as being optional. All **configuration entries** are mandatory; a starter `settings.json` file is given below:
 
 
 **DON'T FORGET TO REPLACE [app-name]**
