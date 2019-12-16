@@ -1,6 +1,6 @@
 {
   "name": "restaculous",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An opinionated ExpressJs based REST API generator.",
   "main": "app.js",
   "bin": {
@@ -24,11 +24,5 @@
     "clone": "^2.1.2",
     "fs-extra": "^8.1.0",
     "pluralize": "^8.0.0"
-  },
-  "devDependencies": {
-    "apidoc": "^0.17.5",
-    "chai": "^3.5.0",
-    "chi": "0.0.10",
-    "mocha": "^3.2.0"
   }
 }
