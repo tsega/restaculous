@@ -218,5 +218,3 @@ exports.generate = function generateConfig(settings, cb) {
     appSettings = settings;
     workflow.emit('readConfigTemplate', cb);
 };
-
-
