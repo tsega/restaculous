@@ -7,8 +7,7 @@ Please note we have a code of conduct, please follow it in all your interactions
 
 ## Pull Request Process
 
-1. Update the CHANGELOG.md with details of your changes, this include a one sentence summary of
-   variables, exposed ports, useful file locations and container parameters.
+1. Update the CHANGELOG.md with details of your changes, this include a one line summary of the work.
 2. Increase the version numbers in any examples files and the README.md to the new version that this
    Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/).
 3. Pull Requests will be merged once you have the sign-off of the developers of the project, or if you 
