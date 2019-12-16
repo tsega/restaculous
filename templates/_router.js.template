@@ -5,5 +5,8 @@ var express = require('express');
 
 // Export Router Initializer
 module.exports = function iniRouter(app) {
+// Set home rout to docs page
+app.use(express.static('docs'));
+
 {{initializeRoutes}}
 };
