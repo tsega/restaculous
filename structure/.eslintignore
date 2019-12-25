@@ -1,0 +1,8 @@
+# Dependency directory
+node_modules
+
+# Documentation
+docs
+
+# Tests
+test

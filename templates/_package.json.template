@@ -13,7 +13,9 @@
   "scripts": {
     "test": "./node_modules/.bin/mocha",
     "start": "DEBUG={{appName}}* nodemon app.js",
-    "build-docs": "./node_modules/.bin/apidoc -i ./routes -o ./docs"
+    "build-docs": "./node_modules/.bin/apidoc -i ./routes -o ./docs",
+    "prettier": "./node_modules/.bin/prettier --write *.js **/*.js",
+    "eslint": "./node_modules/.bin/eslint --fix  './**/*.js'"
   },
   "author": "",
   "license": "MIT",
@@ -27,7 +29,16 @@
     "apidoc": "^0.19.0",
     "chai": "^4.2.0",
     "chi": "0.0.10",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.19.1",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "mocha": "^6.2.2",
+    "prettier": "^1.19.1",
     "supertest": "^4.0.2"
   },
   "apidoc": {
@@ -35,5 +46,17 @@
     "version": "0.0.1",
     "description": "{{appDescription}}",
     "title": "{{appName}}-api Documentation"
+  },
+  "prettier": {
+    "printWidth":80,
+    "tabWidth":2,
+    "useTabs":false,
+    "semi":true,
+    "singleQuote":false,
+    "trailingComma":"none",
+    "bracketSpacing":true,
+    "requirePragma":false,
+    "insertPragma":false,
+    "proseWrap":"preserve"
   }
 }
