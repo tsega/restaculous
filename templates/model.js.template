@@ -1,8 +1,6 @@
 // Load module dependencies
 var mongoose = require('mongoose');
 
-{{relatedModels}}
-
 // Define {{modelName}} attributes
 var {{modelName}}Schema = mongoose.Schema({
 {{modelSchema}}
