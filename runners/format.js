@@ -24,15 +24,17 @@ var appSettings = {};
  *
  *  Fix any code formatting issues by running prettier.
  *
- *  @param {workflowCallback} cb - The callback to handle end of the install process.
+ *  @param {workflowCallback} cb - The callback to handle end of the formatting process.
  */
-workflow.on("runPrettier", function runPrettier(cb) {
-  exec(`cd ${appSettings.directory} && npm run prettier`, function(err) {
+workflow.on("runPrettier", function (cb) {
+  exec(`cd ${appSettings.directory} && npm run prettier`, function(err, stdout, stderr) {
     if (err) {
+      console.log(stderr);
       // Error handling
       cb(err);
     }
 
+    console.log(stdout);
     // Finish base generator workflow
     cb(null);
   });

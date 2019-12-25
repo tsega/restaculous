@@ -27,12 +27,14 @@ var appSettings = {};
  *  @param {workflowCallback} cb - The callback to handle end of the install process.
  */
 workflow.on("generateDocumentation", function generateDocumentation(cb) {
-  exec(`cd ${appSettings.directory} && npm run build-docs`, function(err) {
+  exec(`cd ${appSettings.directory} && npm run build-docs`, function(err, stdout, stderr) {
     if (err) {
+      console.log(stderr);
       // Error handling
       cb(err);
     }
 
+    console.log(stdout);
     // Finish base generator workflow
     cb(null);
   });

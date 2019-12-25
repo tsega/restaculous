@@ -27,8 +27,8 @@ var testGenerator = require("./generators/test");
 var baseGenerator = require("./generators/base");
 var dependenciesInstaller = require("./generators/dependencies");
 var documentationGenerator = require("./generators/documentation");
-var formatter = require("./generators/format");
-
+var formatter = require("./runners/format");
+var linter = require("./runners/lint");
 /*
  *  Generator high-level flow
  *
@@ -266,6 +266,27 @@ workflow.on("format", function runFormatter() {
 
     console.log(
       chalk.green("%s Done Formatting Code"),
+      config.SINGS.success
+    );
+
+    workflow.emit("lint");
+  });
+});
+
+/*
+ *  lint
+ *
+ *  @desc Uses eslint to lint codebase.
+ */
+workflow.on("lint", function runFormatter() {
+  linter.runLinter(settings, function(err) {
+    if (err) {
+      // Output Error to console
+      console.log(err);
+    }
+
+    console.log(
+      chalk.green("%s Done Linting Code"),
       config.SINGS.success
     );
   });
