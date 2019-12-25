@@ -13,7 +13,8 @@
   "scripts": {
     "test": "./node_modules/.bin/mocha",
     "start": "DEBUG={{appName}}* nodemon app.js",
-    "build-docs": "./node_modules/.bin/apidoc -i ./routes -o ./docs"
+    "build-docs": "./node_modules/.bin/apidoc -i ./routes -o ./docs",
+    "prettier": "./node_modules/.bin/prettier --write *.js **/*.js"
   },
   "author": "",
   "license": "MIT",
@@ -28,6 +29,7 @@
     "chai": "^4.2.0",
     "chi": "0.0.10",
     "mocha": "^6.2.2",
+    "prettier": "^1.19.1",
     "supertest": "^4.0.2"
   },
   "apidoc": {
@@ -35,5 +37,17 @@
     "version": "0.0.1",
     "description": "{{appDescription}}",
     "title": "{{appName}}-api Documentation"
+  },
+  "prettier": {
+    "printWidth":80,
+    "tabWidth":2,
+    "useTabs":false,
+    "semi":true,
+    "singleQuote":false,
+    "trailingComma":"none",
+    "bracketSpacing":true,
+    "requirePragma":false,
+    "insertPragma":false,
+    "proseWrap":"preserve"
   }
 }

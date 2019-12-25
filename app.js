@@ -27,6 +27,7 @@ var testGenerator = require("./generators/test");
 var baseGenerator = require("./generators/base");
 var dependenciesInstaller = require("./generators/dependencies");
 var documentationGenerator = require("./generators/documentation");
+var formatter = require("./generators/format");
 
 /*
  *  Generator high-level flow
@@ -40,8 +41,8 @@ var documentationGenerator = require("./generators/documentation");
  *  7. Generate Tests
  *  8. Generate Configuration
  *  9. Install App dependencies
- *  11. Generate API Docs
- *  10. Generate Codebase Docs
+ *  10. Generate API Docs
+ *  11. Format codebase with Prettier
  */
 var workflow = new events.EventEmitter();
 var settings = {};
@@ -225,6 +226,7 @@ workflow.on("installDependencies", function installDependencies() {
       chalk.green("%s Done Installing Dependencies"),
       config.SINGS.success
     );
+
     workflow.emit("generateDocumentation");
   });
 });
@@ -245,8 +247,29 @@ workflow.on("generateDocumentation", function generateDocumentation() {
         chalk.green("%s Done Generating Documentation"),
         config.SINGS.success
       );
+
+      workflow.emit("format");
     });
   });
+
+/*
+ *  format
+ *
+ *  @desc Uses Prettier to format codebase.
+ */
+workflow.on("format", function runFormatter() {
+  formatter.runFormatter(settings, function(err) {
+    if (err) {
+      // Output Error to console
+      console.log(err);
+    }
+
+    console.log(
+      chalk.green("%s Done Formatting Code"),
+      config.SINGS.success
+    );
+  });
+});
 
 /*
  *  getSettingsFilePath
