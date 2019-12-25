@@ -40,7 +40,7 @@ workflow.on('readRouteTemplate', function readRouteTemplate(models, cb) {
     if (allModels.length) {
         var currentModel = allModels.pop();
 
-        fs.readFile(__dirname + '/../templates/route.js.template', opts, function rf(err, routeFile) {
+        fs.readFile(`${__dirname}/../templates/route.js.template`, opts, function rf(err, routeFile) {
             if (err) {
                 // Error handling
                 cb(err);
@@ -137,14 +137,15 @@ workflow.on('createRouteFile', function createRouteFile(models, currentModel, ro
  *  @returns {String} the replacement string to put in documentation
  */
 function createParamToken(model) {
-    var tokenReplacement = [];
+    var tokenReplacement = " *";
     model.attributes.forEach(function (attribute) {
         if (!attribute.isAuto) {
-            tokenReplacement.push(" * @apiParam {" + attribute.type + "} " + attribute.name + " " + attribute.desc);
+            tokenReplacement += `
+ * @apiParam {${attribute.type}}  ${attribute.name} ${attribute.desc}`;
         }
     });
 
-    return tokenReplacement.join('\n');
+    return tokenReplacement;
 }
 
 /*  createParamExampleToken
@@ -155,18 +156,21 @@ function createParamToken(model) {
  *  @returns {String} the replacement string to put in documentation
  */
 function createParamExampleToken(model) {
-    var tokenReplacement = [
-        " * @apiParamExample {json} Request-Example:",
-        " * \t {"
-    ];
-    model.attributes.forEach(function (attribute) {
+    var tokenReplacement = ` *
+ * @apiParamExample {json} Request-Example:
+ *   {`;
+
+    model.attributes.forEach(function (attribute, index) {
         if (!attribute.isAuto) {
-            tokenReplacement.push(" * \t\t" + attribute.name + ": " + attribute.example + ",");
+            tokenReplacement += `
+ *     "${attribute.name}": "${attribute.example}"${index < model.attributes.length - 1 ? "," : ""}`;
         }
     });
-    tokenReplacement.push(" * \t }");
 
-    return tokenReplacement.join('\n');
+    tokenReplacement += `
+ *   }`;
+
+    return tokenReplacement;
 }
 
 /*  createSuccessToken
@@ -177,14 +181,16 @@ function createParamExampleToken(model) {
  *  @returns {String} the replacement string to put in documentation
  */
 function createSuccessToken(model) {
-    var tokenReplacement = [" * @apiSuccess {String} _id  The ID of the newly created " + model.name.toLowerCase() + "."];
-    model.attributes.forEach(function (attribute) {
+    var tokenReplacement = ` *
+ * @apiSuccess {String} _id  The ID of the newly created  ${model.name.toLowerCase()}.`;
+    model.attributes.forEach(function (attribute, index) {
         if (!attribute.isPrivate) {
-            tokenReplacement.push(" * @apiSuccess {" + attribute.type + "} " + attribute.name + " " + attribute.desc);
+            tokenReplacement += `
+ * @apiSuccess {${attribute.type}} ${attribute.name} ${attribute.desc}${index < model.attributes.length - 1 ? "," : ""}`;
         }
     });
 
-    return tokenReplacement.join('\n');
+    return tokenReplacement;
 }
 
 /*  createSuccessExampleToken
@@ -195,20 +201,21 @@ function createSuccessToken(model) {
  *  @returns {String} the replacement string to put in documentation
  */
 function createSuccessExampleToken(model) {
-    var tokenReplacement = [
-        " * @apiSuccessExample {json} Success-Response:",
-        " * \t HTTP/1.1 201 Created",
-        " * \t {",
-        " * \t\t _id: '58a1ea8b36dfb71d975384af',"
-    ];
-    model.attributes.forEach(function (attribute) {
+    var tokenReplacement = ` *
+ * @apiSuccessExample {json} Success-Response:
+ *   HTTP/1.1 201 Created
+ *   {
+ *     "_id": "58a1ea8b36dfb71d975384af",`;
+    model.attributes.forEach(function (attribute, index) {
         if (!attribute.isPrivate) {
-            tokenReplacement.push(" * \t\t" + attribute.name + ": " + attribute.example + ",");
+            tokenReplacement += `
+ *     "${attribute.name}": "${attribute.example}"${index < model.attributes.length - 1 ? "," : ""}`;
         }
     });
-    tokenReplacement.push(" * \t }");
+    tokenReplacement += `
+ *   }`;
 
-    return tokenReplacement.join('\n');
+    return tokenReplacement;
 }
 
 /*  searchParamToken
@@ -219,15 +226,14 @@ function createSuccessExampleToken(model) {
  *  @returns {String} the replacement string to put in documentation
  */
 function searchParamToken(model) {
-    var tokenReplacement = [
-        " * @apiParam {String} [filter]   The filtering to select the " + pluralize(model.name.toLowerCase()) + " to return.",
-        " * @apiParam {String} [fields]   The fields of the " + model.name + " document to return.",
-        " * @apiParam {String} [limit]    The maximum number of " + pluralize(model.name.toLowerCase()) + " to return.",
-        " * @apiParam {String} [page]     The page number used to determine how many documents to skip.",
-        " * @apiParam {String} [sort]     The sort field to use in ascending or descending order."
-    ];
+    var tokenReplacement = ` *
+ * @apiParam {String} [filter]   The filtering to select the ${pluralize(model.name.toLowerCase())} to return.
+ * @apiParam {String} [fields]   The fields of the ${model.name} document to return.
+ * @apiParam {String} [limit]    The maximum number of ${pluralize(model.name.toLowerCase())} to return.
+ * @apiParam {String} [page]     The page number used to determine how many documents to skip.
+ * @apiParam {String} [sort]     The sort field to use in ascending or descending order.`;
 
-    return tokenReplacement.join('\n');
+    return tokenReplacement;
 }
 
 /*  searchParamExampleToken
@@ -238,13 +244,12 @@ function searchParamToken(model) {
  *  @returns {String} the replacement string to put in documentation
  */
 function searchParamExampleToken(model) {
-    var tokenReplacement = [
-        " * @apiParamExample {json} Request-Example:",
-        " * \t {",
-        " * \t\t filter: {last_update:'2017-02-13T17:19:08.404Z'}",
-        " * \t\t limit: 50",
-        " * \t\t sort: -date_created"
-    ];
+    var tokenReplacement = ` *
+ * @apiParamExample {json} Request-Example:",
+ * {
+ *   "filter": { "modifiedAt": "2017-02-13T17:19:08.404Z" },
+ *   "limit": 50,
+ *   "sort": "-createdAt",`;
 
     var fields = [];
 
@@ -252,10 +257,11 @@ function searchParamExampleToken(model) {
         fields.push(attribute.name);
     });
 
-    tokenReplacement.push(" * \t\t fields:" + fields.join(",") + ",");
-    tokenReplacement.push(" * \t }");
+    tokenReplacement += `
+ *   "fields": "${fields.join(",")}"
+ * }`;
 
-    return tokenReplacement.join('\n');
+    return tokenReplacement;
 }
 
 /*  searchSuccessToken
@@ -266,12 +272,11 @@ function searchParamExampleToken(model) {
  *  @returns {String} the replacement string to put in documentation
  */
 function searchSuccessToken(model) {
-    var tokenReplacement = [
-        " * @apiSuccess {Object} options  The query options used in the search the " + pluralize(model.name.toLowerCase()) + ".",
-        " * @apiSuccess {Object[]} " + pluralize(model.name.toLowerCase()) + "  The resulting set of documents."
-    ];
+    var tokenReplacement = ` *
+ * @apiSuccess {Object} options  The query options used in the search the ${pluralize(model.name.toLowerCase())}.,
+ * @apiSuccess {Object[]} ${pluralize(model.name.toLowerCase())} The resulting set of documents.`;
 
-    return tokenReplacement.join('\n');
+    return tokenReplacement;
 }
 
 /*  searchSuccessExampleToken
@@ -288,27 +293,28 @@ function searchSuccessExampleTokens(model) {
         fields.push(attribute.name);
     });
 
-    var tokenReplacement = [
-        " * @apiSuccessExample {json} Success-Response: ",
-        " * \t HTTP/1.1 200 OK",
-        " * \t {",
-        " * \t\t options: {",
-        " * \t\t\t filter: {last_update:'2017-02-13T17:19:08.404Z'},",
-        " * \t\t\t fields: '" + fields.join(",") + "',",
-        " * \t\t\t limit: 50,",
-        " * \t\t\t sort: -date_created,",
-        " * \t\t },",
-        " * \t\t " + pluralize(model.name.toLowerCase()) + ": [{"
-    ];
+    var tokenReplacement = ` *
+ * @apiSuccessExample {json} Success-Response:
+ *   HTTP/1.1 200 OK
+ *   {
+ *     "options": {
+ *       "filter": { "modifiedAt": "2017-02-13T17:19:08.404Z"\" },
+ *       "fields": "${fields.join(",")}",
+ *       "limit": 50,
+ *       "sort": "-createdAt",
+ *     },
+ *     "${pluralize(model.name.toLowerCase())}": [{`;
     model.attributes.forEach(function (attribute) {
         if (!attribute.isPrivate) {
-            tokenReplacement.push(" * \t\t\t" + attribute.name + ": " + attribute.example + ",");
+            tokenReplacement += `
+ *       "${attribute.name}": "${attribute.example}"`;
         }
     });
-    tokenReplacement.push(" * \t\t }]")
-    tokenReplacement.push(" * \t }");
+    tokenReplacement += `
+ *     }
+ *   }`;
 
-    return tokenReplacement.join('\n');
+    return tokenReplacement;
 }
 
 /*  getSuccessToken
@@ -319,14 +325,16 @@ function searchSuccessExampleTokens(model) {
  *  @returns {String} the replacement string to put in documentation
  */
 function getSuccessToken(model) {
-    var tokenReplacement = [" * @apiSuccess {String} _id  The ID of the " + model.name.toLowerCase() + "."];
+    var tokenReplacement = ` *
+ * @apiSuccess {String} _id  The ID of the ${model.name.toLowerCase()}.`;
     model.attributes.forEach(function (attribute) {
         if (!attribute.isPrivate) {
-            tokenReplacement.push(" * @apiSuccess {" + attribute.type + "} " + attribute.name + " " + attribute.desc);
+            tokenReplacement += `
+ * @apiSuccess {${attribute.type}} ${attribute.name} ${attribute.desc}`;
         }
     });
 
-    return tokenReplacement.join('\n');
+    return tokenReplacement;
 }
 
 /*  getSuccessExampleToken
@@ -337,20 +345,21 @@ function getSuccessToken(model) {
  *  @returns {String} the replacement string to put in documentation
  */
 function getSuccessExampleToken(model) {
-    var tokenReplacement = [
-        " * @apiSuccessExample {json} Success-Response:",
-        " * \t HTTP/1.1 200 OK ",
-        " * \t {",
-        " * \t\t _id: '58a1ea8b36dfb71d975384af',"
-    ];
-    model.attributes.forEach(function (attribute) {
+    var tokenReplacement = ` *
+ * @apiSuccessExample {json} Success-Response:
+ *   HTTP/1.1 200 OK
+ *   {
+ *     "_id": "58a1ea8b36dfb71d975384af",`;
+    model.attributes.forEach(function (attribute, index) {
         if (!attribute.isPrivate) {
-            tokenReplacement.push(" * \t\t" + attribute.name + ": " + attribute.example + ",");
+            tokenReplacement += `
+ *     "${attribute.name}": "${attribute.example}"${index < model.attributes.length - 1 ? "," : ""}`;
         }
     });
-    tokenReplacement.push(" * \t }");
+    tokenReplacement += `
+ *   }`;
 
-    return tokenReplacement.join('\n');
+    return tokenReplacement;
 }
 
 /*  updateParamExampleToken
@@ -361,20 +370,22 @@ function getSuccessExampleToken(model) {
  *  @returns {String} the replacement string to put in documentation
  */
 function updateParamExampleToken(model) {
-    var tokenReplacement = [
-        " * @apiParamExample {json} Request-Example:",
-        " * \t {",
-        " * \t\t _id: '58a1ea8b36dfb71d975384af',",
-        " * \t\t document: {"
-    ];
-    model.attributes.forEach(function (attribute) {
-        tokenReplacement.push(" * \t\t\t" + attribute.name + ": " + attribute.example + ",");
+    var tokenReplacement = ` *
+ * @apiParamExample {json} Request-Example:
+ * {
+ *   "_id": "58a1ea8b36dfb71d975384af",
+ *   "document": {`;
+
+    model.attributes.forEach(function (attribute, index) {
+        tokenReplacement += `
+ *      "${attribute.name}": "${attribute.example}"${index < model.attributes.length - 1 ? "," : ""}`;
     });
 
-    tokenReplacement.push(" * \t\t }");
-    tokenReplacement.push(" * \t }");
+    tokenReplacement += `
+ *   }
+ * }`;
 
-    return tokenReplacement.join('\n');
+    return tokenReplacement;
 }
 
 /*
@@ -386,12 +397,10 @@ function updateParamExampleToken(model) {
  *  @returns {String} the full path of the route file.
  */
 function getRouteFileName(modelName){
-    return appSettings.directory + "/routes/" + modelName.toLowerCase() + '.js' ;
+    return `${appSettings.directory}/routes/${modelName.toLowerCase()}.js` ;
 }
 
 exports.generate = function generateRoutes(settings, cb) {
     appSettings = settings;
     workflow.emit('readRouteTemplate', appSettings.models, cb);
 };
-
-
