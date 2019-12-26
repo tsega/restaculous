@@ -37,21 +37,12 @@ exports.create = function create({{modelNameToLower}}Data, cb) {
 exports.remove = function remove(query, cb) {
     console.log('deleting {{modelNameToLower}}: ', query);
     {{modelName}}
-        .findOne(query)
-        .populate(population)
-        .exec(function delete{{modelName}}(err, {{modelNameToLower}}) {
+        .findOneAndRemove(query, function delete{{modelName}}(err, {{modelNameToLower}}) {
             if (err) {
                 return cb(err);
             }
-            if (!{{modelNameToLower}}) {
-                return cb(null, {});
-            }
-            {{modelNameToLower}}.remove(function (err) {
-                if (err) {
-                    return cb(err);
-                }
-                cb(null, {{modelNameToLower}});
-            });
+
+            cb(null, {{modelNameToLower}});
         });
 };
 
