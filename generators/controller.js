@@ -155,21 +155,20 @@ function defaultFieldList(model) {
  *
  */
 function createActionFieldValidation(model) {
-    var tokenReplacement = [];
+    var tokenReplacement = "";
 
     model.attributes.forEach(function (attribute) {
-        tokenReplacement.push("\t\t\t" + attribute.name + ": {");
-        if (attribute.isOptional) {
-            tokenReplacement.push("\t\t\t\t optional: true,");
-            tokenReplacement.push("\t\t\t\t errorMessage: 'Invalid " + attribute.name + "'");
-        } else {
-            tokenReplacement.push("\t\t\t\t notEmpty: true,");
-            tokenReplacement.push("\t\t\t\t errorMessage: 'Invalid " + attribute.name + "'");
+        // Validation based on setting
+        if(attribute.validation) {
+            attribute.validation.forEach(function(option) {
+                tokenReplacement += `
+                    body("${attribute.name}", "${option.message}")
+                        .${option.type}();`;
+            });
         }
-        tokenReplacement.push("\t\t\t},");
     });
 
-    return tokenReplacement.join("\n");
+    return tokenReplacement;
 }
 
 /*
