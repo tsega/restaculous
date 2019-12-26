@@ -66,9 +66,9 @@ You can generate an entire application by simply supplying a **json** settings f
           "type": "[the data type of the attribute]",
           "desc": "[a small description about the attribute]",
           "example": "[an example of the attribute]",
-          "validation: [
-            { "type": "[based on *Express Validator*]" , "message": "[message to show when validation fails]"}
-          ]
+          "validation": [
+            { "type": "[based on Express Validator]" , "message": "[message to show when validation fails]"}
+          ],
           "isPrivate": "[indicates the attribute will not be returned, e.g. password (optional)]",
           "isAuto": "[indicates that the value for the attribute will be generated automatically, e.g. date_created (optional)]"
         }
