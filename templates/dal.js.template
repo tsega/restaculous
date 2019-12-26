@@ -16,17 +16,12 @@ var population = [
 exports.create = function create({{modelNameToLower}}Data, cb) {
     console.log('creating a new {{modelName}}');
     // Create {{modelName}}
-    var {{modelNameToLower}}Model = new {{modelName}}({{modelNameToLower}}Data);
-    {{modelNameToLower}}Model.save(function save{{modelName}}(err, data) {
+    {{modelName}}.create({{modelNameToLower}}Data, function create{{modelName}}(err, {{modelNameToLower}}) {
         if (err) {
             return cb(err);
         }
-        exports.get({_id: data._id}, function (err, {{modelNameToLower}}) {
-            if (err) {
-                return cb(err);
-            }
-            cb(null, {{modelNameToLower}});
-        });
+
+        cb(null, {{modelNameToLower}});
     });
 };
 
