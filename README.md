@@ -66,6 +66,9 @@ You can generate an entire application by simply supplying a **json** settings f
           "type": "[the data type of the attribute]",
           "desc": "[a small description about the attribute]",
           "example": "[an example of the attribute]",
+          "validation: [
+            { "type": "[based on *Express Validator*]" , "message": "[message to show when validation fails]"}
+          ]
           "isPrivate": "[indicates the attribute will not be returned, e.g. password (optional)]",
           "isAuto": "[indicates that the value for the attribute will be generated automatically, e.g. date_created (optional)]"
         }
@@ -78,6 +81,8 @@ You can generate an entire application by simply supplying a **json** settings f
   ]
 }
 ```
+
+> Note: For details on the **Express Validator** validators, please look at its [documentation on GitHub](https://github.com/validatorjs/validator.js#validators).
 
 Here is an example `settings.json` file:
 
@@ -107,7 +112,10 @@ Here is an example `settings.json` file:
           "name": "title",
           "type": "String",
           "desc": "The title of the movie.",
-          "example": "Forest Gump"
+          "example": "Forest Gump",
+          "validation": [
+            { "type": "isEmpty", "message": "Title is required." }
+          ]
         },
         {
           "name": "genre",
@@ -129,13 +137,19 @@ Here is an example `settings.json` file:
           "name": "firstName",
           "type": "String",
           "desc": "The first name of the actor.",
-          "example": "Tom"
+          "example": "Tom",
+          "validation": [
+            { "type": "isEmpty", "message": "First Name is required." }
+          ]
         },
         {
           "name": "lastName",
           "type": "String",
           "desc": "The last name of the actor.",
-          "example": "Hanks"
+          "example": "Hanks",
+          "validation": [
+            { "type": "isEmpty", "message": "Last Name is required." }
+          ]
         }
       ],
       "relations": [{
@@ -150,7 +164,10 @@ Here is an example `settings.json` file:
           "name": "name",
           "type": "String",
           "desc": "The name of the playlist.",
-          "example": "Classic Movies"
+          "example": "Classic Movies",
+          "validation": [
+            { "type": "isEmpty", "message": "Name is required." }
+          ]
         }
       ],
       "relations": [{
@@ -195,7 +212,10 @@ Here is an example `settings.json` file:
           "name": "",
           "type": "",
           "desc": "",
-          "example": ""
+          "example": "",
+          "validation": [
+            { "type": "", "message": "" }
+          ]
         }
       ]
     }
