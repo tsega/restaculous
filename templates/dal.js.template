@@ -59,8 +59,7 @@ exports.remove = function remove(query, cb) {
 /**
  * update a {{modelNameToLower}}
  *
- * @desc  update data of the {{modelNameToLower}} with the given
- *        id
+ * @desc  update data of the {{modelNameToLower}} with the given id
  *
  * @param {Object} query Query object
  * @param {Object} updates  Update data
@@ -68,9 +67,9 @@ exports.remove = function remove(query, cb) {
  */
 exports.update = function update(query, updates, cb) {
     console.log('updating {{modelNameToLower}}: ', query);
-    updates.last_modified = new Date().toISOString();
+
     {{modelName}}
-        .findOneAndUpdate(query, updates, {new: true}) // option to return the new document
+        .findOneAndUpdate(query, { $set: updates }, {new: true}) // option to return the new document
         .populate(population)
         .exec(function update{{modelName}}(err, {{modelNameToLower}}) {
             if (err) {
