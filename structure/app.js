@@ -10,16 +10,24 @@ var config = require("./config");
 var router = require("./routes");
 
 // Connect to Mongodb
-mongoose.connect(config.MONGODB_URL, { useNewUrlParser: true }, function(err) {
-  if (err) {
-    console.error("Connection to Mongodb Failed!");
+mongoose.connect(
+  config.MONGODB_URL,
+  {
+    useNewUrlParser: true,
+    useFindAndModify: false,
+    useUnifiedTopology: true
+  },
+  function(err) {
+    if (err) {
+      console.error("Connection to Mongodb Failed!");
 
-    // Try to reconnect
-    mongoose.connect(config.MONGODB_URL);
+      // Try to reconnect
+      mongoose.connect(config.MONGODB_URL);
+    }
+
+    console.log("Mongodb connected successfully");
   }
-
-  console.log("Mongodb connected successfully");
-});
+);
 
 // Initialize app
 var app = express();
