@@ -303,7 +303,7 @@ function searchSuccessExampleTokens(model) {
  *       "limit": 50,
  *       "sort": "-createdAt",
  *     },
- *     "${pluralize(model.name.toLowerCase())}": [{`;
+ *     "result": [{`;
     model.attributes.forEach(function (attribute) {
         if (!attribute.isPrivate) {
             tokenReplacement += `
@@ -311,7 +311,7 @@ function searchSuccessExampleTokens(model) {
         }
     });
     tokenReplacement += `
- *     }
+ *     }]
  *   }`;
 
     return tokenReplacement;
