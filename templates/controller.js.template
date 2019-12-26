@@ -1,5 +1,6 @@
 // Load Module Dependencies
 var events = require('events');
+var { body, param, query, validationResult } =  require('express-validator');
 
 // Load Search Options library file
 var searchOptions = require('../lib/search_options');
@@ -21,19 +22,15 @@ exports.create{{modelName}} = function create{{modelName}}(req, res, next) {
 
     workflow.on('validateData', function validateData() {
         // Validate {{modelName}} data
-        req.checkBody({
-            {{modelCreateFieldValidation}}
-        });
+        {{modelCreateFieldValidation}}
 
-        var validationErrors = req.validationErrors();
-
-        if (validationErrors) {
-            res.status(400);
-            res.json(validationErrors);
-        } else {
-            // On Success emit create {{modelName}} event
-            workflow.emit('create{{modelName}}');
+        var errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({ errors: errors.array() });
         }
+
+        // On Success emit create {{modelName}} event
+        workflow.emit('create{{modelName}}');
     });
 
     workflow.on('create{{modelName}}', function create{{modelName}}() {
@@ -66,19 +63,17 @@ exports.get{{modelName}} = function get{{modelName}}(req, res, next) {
     var workflow = new events.EventEmitter();
 
     workflow.on('validate{{modelName}}Id', function validate{{modelName}}Id() {
-        // Validate {{modelName}} ID
-        req.checkParams('{{modelNameToLower}}Id', '{{modelName}} ID Invalid!')
-            .isObjectId();
+        // Validate {{modelName}} ID,s
+        param('{{modelNameToLower}}Id', '{{modelName}} ID Invalid!')
+            .isMongoId();
 
-        var validationErrors = req.validationErrors();
-
-        if (validationErrors) {
-            res.status(400);
-            res.json(validationErrors);
-        } else {
-            // On Success emit fetch {{modelName}} event
-            workflow.emit('fetch{{modelName}}', req.params.{{modelNameToLower}}Id);
+        var errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({ errors: errors.array() });
         }
+
+        // On Success emit fetch {{modelName}} event
+        workflow.emit('fetch{{modelName}}', req.params.{{modelNameToLower}}Id);
     });
 
     workflow.on('fetch{{modelName}}', function fetch{{modelName}}({{modelNameToLower}}Id) {
@@ -120,24 +115,22 @@ exports.search{{modelNamePlural}} = function search{{modelNamePlural}}(req, res,
     workflow.on('validateSearchQuery', function validateSearchQuery() {
         // Validate search parameters
 
-        req.checkQuery('filter', 'Filter is empty!')
+        query('filter', 'Filter is empty!')
             .notEmpty();
-        req.checkQuery('page', 'Page should be a number!')
+        query('page', 'Page should be a number!')
             .isInt();
-        req.checkQuery('limit', 'Limit should be a number!')
+        query('limit', 'Limit should be a number!')
             .isInt();
-        req.checkQuery('sort', 'Sort field is empty!')
+        query('sort', 'Sort field is empty!')
             .notEmpty();
 
-        var validationErrors = req.validationErrors();
-
-        if (validationErrors) {
-            res.status(400);
-            res.json(validationErrors);
-        } else {
-            // On Success emit search {{modelNamePlural}} event
-            workflow.emit('search{{modelNamePlural}}');
+        var errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({ errors: errors.array() });
         }
+
+        // On Success emit search {{modelNamePlural}} event
+        workflow.emit('search{{modelNamePlural}}');
     });
 
     workflow.on('search{{modelNamePlural}}', function search{{modelNamePlural}}() {
@@ -182,23 +175,18 @@ exports.update{{modelName}} = function update{{modelName}}(req, res, next) {
 
     workflow.on('validate{{modelName}}Data', function validate{{modelName}}Data() {
         // Validate {{modelName}} id
-        req.checkParams('{{modelNameToLower}}Id', '{{modelName}} ID Invalid!')
-            .isObjectId();
+        param('{{modelNameToLower}}Id', '{{modelName}} ID Invalid!')
+            .isMongoId();
 
-        // Validate update document
-         req.checkBody({
-            {{modelUpdateFieldValidation}}
-         });
+        // @TODO: Validation of update document
 
-        var validationErrors = req.validationErrors();
-
-        if (validationErrors) {
-            res.status(400);
-            res.json(validationErrors);
-        } else {
-            // On Success emit update {{modelName}} event
-            workflow.emit('update{{modelName}}');
+        var errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({ errors: errors.array() });
         }
+
+        // On Success emit update {{modelName}} event
+        workflow.emit('update{{modelName}}');
     });
 
     workflow.on('update{{modelName}}', function update{{modelName}}() {
@@ -234,18 +222,16 @@ exports.remove{{modelName}} = function remove{{modelName}}(req, res, next) {
 
     workflow.on('validate{{modelName}}Id', function validate{{modelName}}Id() {
         // Validate {{modelName}} id
-        req.checkParams('{{modelNameToLower}}Id', '{{modelName}} ID Invalid!')
-            .isObjectId();
+        param('{{modelNameToLower}}Id', '{{modelName}} ID Invalid!')
+            .isMongoId();
 
-        var validationErrors = req.validationErrors();
-
-        if (validationErrors) {
-            res.status(400);
-            res.json(validationErrors);
-        } else {
-            // On Success emit remove {{modelName}} event
-            workflow.emit('remove{{modelName}}');
+        var errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({ errors: errors.array() });
         }
+
+        // On Success emit remove {{modelName}} event
+        workflow.emit('remove{{modelName}}');
     });
 
     workflow.on('remove{{modelName}}', function remove{{modelName}}() {

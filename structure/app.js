@@ -1,10 +1,6 @@
 // Load Module Dependencies
 var express = require("express");
 var mongoose = require("mongoose");
-var validator = require("express-validator");
-
-// Load Custom Validator library
-var customValidator = require("./lib/custom_validator");
 
 var config = require("./config");
 var router = require("./routes");
@@ -34,12 +30,6 @@ var app = express();
 
 // Set Middleware
 app.use(express.json());
-
-// Set Validator
-app.use(validator());
-
-// Set Custom Validation
-app.use(customValidator());
 
 // Set Routes
 router(app);
