@@ -97,7 +97,7 @@ Here is an example `settings.json` file:
     {"name": "SALT_LENGTH", "value":"13", "comment": "SALT VALUE LENGTH"},
     {"name": "TOKEN_LENGTH", "value":"253", "comment": "TOKEN LENGTH"},
     {"name": "MAX_PAGE_SIZE", "value":"100", "comment": "DEFAULT PAGE SIZE"},
-    {"name": "DEFAULT_SORT", "value":"'last_updated'", "comment": "DEFAULT SORT FIELD"}
+    {"name": "DEFAULT_SORT", "value":"'updatedAt'", "comment": "DEFAULT SORT FIELD"}
   ],
   "models": [
     {
@@ -185,7 +185,7 @@ Here is an example `settings.json` file:
     {"name": "SALT_LENGTH", "value":"13", "comment": "SALT VALUE LENGTH"},
     {"name": "TOKEN_LENGTH", "value":"253", "comment": "TOKEN LENGTH"},
     {"name": "MAX_PAGE_SIZE", "value":"100", "comment": "DEFAULT PAGE SIZE"},
-    {"name": "DEFAULT_SORT", "value":"'last_updated'", "comment": "DEFAULT SORT FIELD"}
+    {"name": "DEFAULT_SORT", "value":"'updatedAt'", "comment": "DEFAULT SORT FIELD"}
   ],
   "models": [
     {

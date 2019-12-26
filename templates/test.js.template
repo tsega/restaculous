@@ -95,7 +95,7 @@ describe('{{modelName}} Endpoint', function () {
                     }
 
                     // Assertion tests on response body
-                    expect({{modelNameToLower}}.last_modified).to.not.equal(res.body.last_modified);
+                    expect({{modelNameToLower}}.updatedAt).to.not.equal(res.body.updatedAt);
 
                     done();
                 });
