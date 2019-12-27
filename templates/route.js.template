@@ -1,5 +1,6 @@
 // Load Module Dependencies
 var express = require('express');
+var { getValidator, postValidator, putValidator, deleteValidator } = require("./validators/{{modelNameToLower}}");
 
 var {{modelName}} = require('../controllers/{{modelNameToLower}}');
 
@@ -21,7 +22,7 @@ var router = express.Router();
 {{modelCreateSuccessExample}}
  *
  */
-router.post('/', {{modelName}}.create{{modelName}});
+router.post('/', postValidator, {{modelName}}.create{{modelName}});
 
 /**
  * @api {get} /{{modelNamePluralToLower}}/search Search {{modelNamePluralToLower}}
@@ -53,7 +54,7 @@ router.get('/search', {{modelName}}.search{{modelNamePlural}});
 {{modelSuccessExample}}
  *
  */
-router.get('/:{{modelNameToLower}}Id', {{modelName}}.get{{modelName}});
+router.get('/:{{modelNameToLower}}Id', getValidator, {{modelName}}.get{{modelName}});
 
 /**
  * @api {put} /{{modelNamePluralToLower}}/:{{modelNameToLower}}Id Update {{modelNameToLower}}
@@ -71,7 +72,7 @@ router.get('/:{{modelNameToLower}}Id', {{modelName}}.get{{modelName}});
 {{modelSuccessExample}}
  *
  */
-router.put('/:{{modelNameToLower}}Id', {{modelName}}.update{{modelName}});
+router.put('/:{{modelNameToLower}}Id', putValidator, {{modelName}}.update{{modelName}});
 
 /**
  * @api {delete} /{{modelNamePluralToLower}}/:{{modelNameToLower}}Id Delete {{modelNameToLower}}
@@ -85,7 +86,7 @@ router.put('/:{{modelNameToLower}}Id', {{modelName}}.update{{modelName}});
  *
 {{modelSuccessExample}}
  */
-router.delete('/:{{modelNameToLower}}Id', {{modelName}}.remove{{modelName}});
+router.delete('/:{{modelNameToLower}}Id', deleteValidator, {{modelName}}.remove{{modelName}});
 
 // Export the router
 module.exports = router;

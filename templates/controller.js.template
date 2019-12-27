@@ -1,6 +1,6 @@
 // Load Module Dependencies
 var events = require('events');
-var { body, param, query, validationResult } =  require('express-validator');
+var { validationResult } =  require('express-validator');
 
 // Load Search Options library file
 var searchOptions = require('../lib/search_options');
@@ -22,8 +22,6 @@ exports.create{{modelName}} = function create{{modelName}}(req, res, next) {
 
     workflow.on('validateData', function validateData() {
         // Validate {{modelName}} data
-        {{modelCreateFieldValidation}}
-
         var errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(422).json({ errors: errors.array() });
@@ -63,10 +61,7 @@ exports.get{{modelName}} = function get{{modelName}}(req, res, next) {
     var workflow = new events.EventEmitter();
 
     workflow.on('validate{{modelName}}Id', function validate{{modelName}}Id() {
-        // Validate {{modelName}} ID,s
-        param('{{modelNameToLower}}Id', '{{modelName}} ID Invalid!')
-            .isMongoId();
-
+        // Validate {{modelName}} ID
         var errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(422).json({ errors: errors.array() });
@@ -112,27 +107,6 @@ exports.search{{modelNamePlural}} = function search{{modelNamePlural}}(req, res,
     req.query.limit = searchOptions.getLimit(req);
     req.query.sort = searchOptions.getSort(req);
 
-    workflow.on('validateSearchQuery', function validateSearchQuery() {
-        // Validate search parameters
-
-        query('filter', 'Filter is empty!')
-            .notEmpty();
-        query('page', 'Page should be a number!')
-            .isInt();
-        query('limit', 'Limit should be a number!')
-            .isInt();
-        query('sort', 'Sort field is empty!')
-            .notEmpty();
-
-        var errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(422).json({ errors: errors.array() });
-        }
-
-        // On Success emit search {{modelNamePlural}} event
-        workflow.emit('search{{modelNamePlural}}');
-    });
-
     workflow.on('search{{modelNamePlural}}', function search{{modelNamePlural}}() {
         var opts = {
             filter: req.query.filter,
@@ -160,7 +134,7 @@ exports.search{{modelNamePlural}} = function search{{modelNamePlural}}(req, res,
         });
     });
 
-    workflow.emit('validateSearchQuery');
+    workflow.emit('search{{modelNamePlural}}');
 };
 
 /*
@@ -174,12 +148,7 @@ exports.update{{modelName}} = function update{{modelName}}(req, res, next) {
     var workflow = new events.EventEmitter();
 
     workflow.on('validate{{modelName}}Data', function validate{{modelName}}Data() {
-        // Validate {{modelName}} id
-        param('{{modelNameToLower}}Id', '{{modelName}} ID Invalid!')
-            .isMongoId();
-
-        // @TODO: Validation of update document
-
+        // Validate {{modelName}} ID and update document
         var errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(422).json({ errors: errors.array() });
@@ -222,9 +191,6 @@ exports.remove{{modelName}} = function remove{{modelName}}(req, res, next) {
 
     workflow.on('validate{{modelName}}Id', function validate{{modelName}}Id() {
         // Validate {{modelName}} id
-        param('{{modelNameToLower}}Id', '{{modelName}} ID Invalid!')
-            .isMongoId();
-
         var errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(422).json({ errors: errors.array() });
