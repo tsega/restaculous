@@ -91,7 +91,7 @@ You can generate an entire application by simply supplying a **json** settings f
 
 > Note: For details on the **Express Validator** validators, please look at its [documentation on GitHub](https://github.com/validatorjs/validator.js#validators).
 
-Here is a [Gist](https://gist.github.com/tsega/b15307af018d49171dfdbde47f0d2d07.js) with an example `settings.json` file.
+Here is a [Gist](https://gist.github.com/tsega/b15307af018d49171dfdbde47f0d2d07) with an example `settings.json` file.
 
 > **Notes:**
  - Timestamp attributes, i.e. `createdAt` and `updatedAt` are automatically added to all models.
