@@ -81,12 +81,6 @@ workflow.on('replaceControllerTokens', function replaceControllerTokens(models, 
     // Model default field list
     controllerFile = controllerFile.replace(/\{\{modelDefaultFieldList\}\}/g, defaultFieldList(currentModel));
 
-    // Model create action field validation
-    controllerFile = controllerFile.replace(/\{\{modelCreateFieldValidation\}\}/g, createActionFieldValidation(currentModel));
-
-    // Model update action field validation
-    controllerFile = controllerFile.replace(/\{\{modelUpdateFieldValidation\}\}/g, updateActionFieldValidation(currentModel));
-
     // Create the controller file
     workflow.emit('createControllerFile', models, currentModel, controllerFile, cb);
 });
@@ -144,58 +138,7 @@ function defaultFieldList(model) {
     return "[" + tokenReplacement.join(", ") + "]";
 }
 
-/*
- *  createActionFieldValidation
- *
- *  @desc builds the field validation token replacement for the 'Create' action
- *
- *  @param {Object} model - the model for which field validation token replacements is generated
- *  @returns {String} the replacement string to put in documentation
- *
- *
- */
-function createActionFieldValidation(model) {
-    var tokenReplacement = "";
-
-    model.attributes.forEach(function (attribute) {
-        // Validation based on setting
-        if(attribute.validation) {
-            attribute.validation.forEach(function(option) {
-                tokenReplacement += `
-                    body("${attribute.name}", "${option.message}")
-                        .${option.type}();`;
-            });
-        }
-    });
-
-    return tokenReplacement;
-}
-
-/*
- *  updateActionFieldValidation
- *
- *  @desc builds the field validation token replacement for the 'Update' action
- *
- *  @param {Object} model - the model for which field validation token replacements is generated
- *  @returns {String} the replacement string to put in documentation
- */
-function updateActionFieldValidation(model) {
-    var tokenReplacement = [];
-
-    model.attributes.forEach(function (attribute) {
-        tokenReplacement.push("\t\t\t" + attribute.name + ": {");
-        tokenReplacement.push("\t\t\t\t optional: true,");
-        tokenReplacement.push("\t\t\t\t errorMessage: 'Invalid " + attribute.name + "'");
-        tokenReplacement.push("\t\t\t},");
-    });
-
-    return tokenReplacement.join("\n");
-}
-
-
 exports.generate = function generateControllers(settings, cb) {
     appSettings = settings;
     workflow.emit('readControllerTemplate', appSettings.models, cb);
 };
-
-

@@ -23,6 +23,7 @@ var modelGenerator = require("./generators/model");
 var dalGenerator = require("./generators/dal");
 var controllerGenerator = require("./generators/controller");
 var routeGenerator = require("./generators/route");
+var validatorGenerator = require("./generators/validator");
 var testGenerator = require("./generators/test");
 var baseGenerator = require("./generators/base");
 var dependenciesInstaller = require("./generators/dependencies");
@@ -38,11 +39,12 @@ var linter = require("./runners/lint");
  *  4. Generate DALs
  *  5. Generate Controllers
  *  6. Generate Routes
- *  7. Generate Tests
- *  8. Generate Configuration
- *  9. Install App dependencies
- *  10. Generate API Docs
- *  11. Format codebase with Prettier
+ *  7. Generate Validators
+ *  8. Generate Tests
+ *  9. Generate Configuration
+ *  10. Install App dependencies
+ *  11. Generate API Docs
+ *  12. Format codebase with Prettier
  */
 var workflow = new events.EventEmitter();
 var settings = {};
@@ -157,7 +159,7 @@ workflow.on("generateControllers", function generateControllers() {
 /*
  *  generateRoutes
  *
- *  @desc Uses the dal generator to create dal files in the new application structure.
+ *  @desc Uses the route generator to create route files in the new application structure.
  */
 workflow.on("generateRoutes", function generateRoutes() {
   routeGenerator.generate(settings, function(err) {
@@ -167,6 +169,23 @@ workflow.on("generateRoutes", function generateRoutes() {
     }
 
     console.log(chalk.green("%s Done Generating Routes"), config.SINGS.success);
+    workflow.emit("generateValidators");
+  });
+});
+
+/*
+ *  generateValidators
+ *
+ *  @desc Uses the validator generator to create validator files in the new application structure.
+ */
+workflow.on("generateValidators", function generateValidators() {
+  validatorGenerator.generate(settings, function(err) {
+    if (err) {
+      // Output Error to console
+      console.log(err);
+    }
+
+    console.log(chalk.green("%s Done Generating Validators"), config.SINGS.success);
     workflow.emit("generateTests");
   });
 });

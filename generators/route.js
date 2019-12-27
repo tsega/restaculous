@@ -92,15 +92,12 @@ workflow.on('replaceRouteTokens', function replaceRouteTokens(models, currentMod
     routeFile = routeFile.replace(/\{\{modelSearchSuccess\}\}/g, searchSuccessToken(currentModel));
     routeFile = routeFile.replace(/\{\{modelSearchSuccessExample\}\}/g, searchSuccessExampleTokens(currentModel));
 
-
     // 'Get', 'Update', 'Delete' action documentation tokens
     routeFile = routeFile.replace(/\{\{modelSuccess\}\}/g, getSuccessToken(currentModel));
     routeFile = routeFile.replace(/\{\{modelSuccessExample\}\}/g, getSuccessExampleToken(currentModel));
 
-
     // 'Update' action documentation tokens
     routeFile = routeFile.replace(/\{\{modelUpdateParamsExample\}\}/g, updateParamExampleToken(currentModel));
-
 
     // Create the model file
     workflow.emit('createRouteFile', models, currentModel, routeFile, cb);
