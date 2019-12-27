@@ -157,7 +157,6 @@ function putFieldValidation(model) {
       // Validation based on setting
       if(attribute.validation) {
         var validatorList = attribute.validation.filter(o => !["isEmpty", "notEmpty"].includes(o.type));
-        console.log(validatorList);
 
         validatorList.forEach(function(option) {
           if(option.type.includes)
