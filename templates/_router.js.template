@@ -2,6 +2,7 @@
 var express = require('express');
 
 {{requireRoutes}}
+{{requireUserRouter}}
 
 // Export Router Initializer
 module.exports = function iniRouter(app) {
@@ -9,4 +10,6 @@ module.exports = function iniRouter(app) {
 app.use(express.static('docs'));
 
 {{initializeRoutes}}
+
+{{userRouter}}
 };

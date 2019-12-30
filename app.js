@@ -19,6 +19,7 @@ var opts = {
  *  Load generators
  */
 var structureGenerator = require("./generators/structure");
+var authGenerator = require("./generators/auth");
 var modelGenerator = require("./generators/model");
 var dalGenerator = require("./generators/dal");
 var controllerGenerator = require("./generators/controller");
@@ -96,6 +97,33 @@ workflow.on("generateStructure", function generateStructure() {
 
     console.log(
       chalk.green("%s Done Generating App Structure"),
+      config.SINGS.success
+    );
+
+    if(settings.authentication) {
+      workflow.emit("generateAuth");
+    } else {
+      workflow.emit("generateModels");
+    }
+  });
+});
+
+/*
+ *  generateAuth
+ *
+ *  @desc Copies the authentication applications structure
+ *
+ *  @param {Object} settings - the settings object read from file
+ */
+workflow.on("generateAuth", function generateAuth() {
+  authGenerator.generate(settings, function(err) {
+    if (err) {
+      // Output Error to console
+      console.log(err);
+    }
+
+    console.log(
+      chalk.green("%s Done Generating Authentication"),
       config.SINGS.success
     );
     workflow.emit("generateModels");

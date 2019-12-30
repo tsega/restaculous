@@ -1,6 +1,6 @@
 {
   "name": "restaculous",
-  "version": "1.5.3",
+  "version": "1.7.0",
   "description": "An opinionated ExpressJs based REST API generator.",
   "main": "app.js",
   "bin": {

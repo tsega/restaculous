@@ -66,6 +66,7 @@ exports.update = function update(query, updates, cb) {
             if (err) {
                 return cb(err);
             }
+
             cb(null, {{modelNameToLower}} || {});
         });
 };
@@ -88,6 +89,7 @@ exports.get = function get(query, cb) {
             if (err) {
                 return cb(err);
             }
+
             cb(null, {{modelNameToLower}} || {});
         });
 };
@@ -112,6 +114,7 @@ exports.search = function search(options, cb) {
             if (err) {
                 return cb(err);
             }
-            return cb(null, {{modelNamePluralToLower}});
+
+            cb(null, {{modelNamePluralToLower}});
         });
 };

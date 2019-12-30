@@ -5,6 +5,7 @@ var events = require('events');
 var fs = require('fs-extra');
 var clone = require('clone');
 var pluralize = require('pluralize');
+var { ACTIONS } = require('../config');
 
 /*
  *  Set file options
@@ -98,6 +99,21 @@ workflow.on('replaceRouteTokens', function replaceRouteTokens(models, currentMod
 
     // 'Update' action documentation tokens
     routeFile = routeFile.replace(/\{\{modelUpdateParamsExample\}\}/g, updateParamExampleToken(currentModel));
+
+    // 'Auth' tokens replacement
+    var authTokens = getAuthTokens(currentModel);
+    var checkAuthImportToken = "";
+    routeFile = routeFile.replace(/\{\{postAuth\}\}/g, authTokens.post);
+    routeFile = routeFile.replace(/\{\{getAuth\}\}/g, authTokens.get);
+    routeFile = routeFile.replace(/\{\{putAuth\}\}/g, authTokens.put);
+    routeFile = routeFile.replace(/\{\{deleteAuth\}\}/g, authTokens.delete);
+    routeFile = routeFile.replace(/\{\{searchAuth\}\}/g, authTokens.search);
+
+    if(authTokens.post || authTokens.get || authTokens.put || authTokens.delete || authTokens.search) {
+        checkAuthImportToken =  "var { checkAuthToken } = require('../lib/auth\');";
+    }
+
+    routeFile = routeFile.replace(/\{\{checkAuthImportToken\}\}/g, checkAuthImportToken);
 
     // Create the model file
     workflow.emit('createRouteFile', models, currentModel, routeFile, cb);
@@ -384,6 +400,23 @@ function updateParamExampleToken(model) {
 
     return tokenReplacement;
 }
+
+/*  getAuthToken
+ *
+ *  @desc Depending on whether Auth has been enabled or not, get the Auth token replacement
+ *
+ *  @param {Object} model - the model for which the auth token replacements are generated
+ *  @returns {String} the replacement string to put in documentation
+ */
+function getAuthTokens(model) {
+    var tokenReplacement = {};
+
+    ACTIONS.forEach(function(action) {
+      tokenReplacement[action] =  model.authentication && model.authentication.includes(action) ? "checkAuthToken, " : "";
+    });
+
+    return tokenReplacement;
+  }
 
 /*
  *  getRouteFileName
