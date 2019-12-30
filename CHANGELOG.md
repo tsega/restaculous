@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.7.0
+- Add token based Authentication, configurable through the settings file
+
 ## 1.5.0
 - Add formatting (Prettier) and linting (eslint) after code base is generated
 - Update use of Express-Validator

@@ -3,6 +3,7 @@ var express = require('express');
 var { getValidator, postValidator, putValidator, deleteValidator } = require("./validators/{{modelNameToLower}}");
 
 var {{modelName}} = require('../controllers/{{modelNameToLower}}');
+{{checkAuthImportToken}}
 
 // Create a router
 var router = express.Router();
@@ -22,7 +23,7 @@ var router = express.Router();
 {{modelCreateSuccessExample}}
  *
  */
-router.post('/', postValidator, {{modelName}}.create{{modelName}});
+router.post('/', {{postAuth}}postValidator, {{modelName}}.create{{modelName}});
 
 /**
  * @api {get} /{{modelNamePluralToLower}}/search Search {{modelNamePluralToLower}}
@@ -39,7 +40,7 @@ router.post('/', postValidator, {{modelName}}.create{{modelName}});
 {{modelSearchSuccessExample}}
  *
  */
-router.get('/search', {{modelName}}.search{{modelNamePlural}});
+router.get('/search', {{searchAuth}}{{modelName}}.search{{modelNamePlural}});
 
 /**
  * @api {get} /{{modelNamePluralToLower}}/:{{modelNameToLower}}Id Get {{modelNameToLower}}
@@ -54,7 +55,7 @@ router.get('/search', {{modelName}}.search{{modelNamePlural}});
 {{modelSuccessExample}}
  *
  */
-router.get('/:{{modelNameToLower}}Id', getValidator, {{modelName}}.get{{modelName}});
+router.get('/:{{modelNameToLower}}Id', {{getAuth}}getValidator, {{modelName}}.get{{modelName}});
 
 /**
  * @api {put} /{{modelNamePluralToLower}}/:{{modelNameToLower}}Id Update {{modelNameToLower}}
@@ -72,7 +73,7 @@ router.get('/:{{modelNameToLower}}Id', getValidator, {{modelName}}.get{{modelNam
 {{modelSuccessExample}}
  *
  */
-router.put('/:{{modelNameToLower}}Id', putValidator, {{modelName}}.update{{modelName}});
+router.put('/:{{modelNameToLower}}Id', {{putAuth}}putValidator, {{modelName}}.update{{modelName}});
 
 /**
  * @api {delete} /{{modelNamePluralToLower}}/:{{modelNameToLower}}Id Delete {{modelNameToLower}}
@@ -86,7 +87,7 @@ router.put('/:{{modelNameToLower}}Id', putValidator, {{modelName}}.update{{model
  *
 {{modelSuccessExample}}
  */
-router.delete('/:{{modelNameToLower}}Id', deleteValidator, {{modelName}}.remove{{modelName}});
+router.delete('/:{{modelNameToLower}}Id', {{deleteAuth}}deleteValidator, {{modelName}}.remove{{modelName}});
 
 // Export the router
 module.exports = router;

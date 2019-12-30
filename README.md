@@ -17,7 +17,8 @@ The application generated has the following features:
   - [x] Express-Validator Integration
   - [x] Automatically generate API documentation
   - [x] Linting of source to ensure proper code formatting
-  - [ ] Token based **Authentication** and **Authorization**
+  - [x] **Authentication**
+  - [ ] **Authorization**
   - [ ] Wizard to generate `settings.json` file
   - [ ] Logging Integration
   - [ ] `.env` Integration
@@ -67,6 +68,7 @@ You can generate an entire application by simply supplying a **json** settings f
   "models": [
     {
       "name": "[model name(capitalized)]",
+      "authentication": "[0 or more of the following 'get','post','put','delete','search']",
       "attributes": [
         {
           "name": "[name of the attribute]",
@@ -77,7 +79,7 @@ You can generate an entire application by simply supplying a **json** settings f
             { "type": "[based on Express Validator]" , "message": "[message to show when validation fails]"}
           ],
           "isPrivate": "[indicates the attribute will not be returned, e.g. password (optional)]",
-          "isAuto": "[indicates that the value for the attribute will be generated automatically, e.g. date_created (optional)]"
+          "isAuto": "[indicates that the value for the attribute will be generated automatically]"
         }
       ],
       "relations": [{
@@ -93,7 +95,9 @@ You can generate an entire application by simply supplying a **json** settings f
 
 Here is a [Gist](https://gist.github.com/tsega/b15307af018d49171dfdbde47f0d2d07) with an example `settings.json` file.
 
-> **Notes:**
+> **Important:**
+ - The top level `authentication` (Boolean) property adds token based authentication to the application.
+ - The model level `authentication` (Array of Action Names) property specifies the API endpoints that require authentication to access. If you don't want authentication added, this key needs to be removed or left as an empty array.
  - Timestamp attributes, i.e. `createdAt` and `updatedAt` are automatically added to all models.
  - All settings fields in the above example are required except the ones identified as being optional. All **configuration entries** are mandatory; a starter `settings.json` file is given below:
 
@@ -109,6 +113,7 @@ Here is a [Gist](https://gist.github.com/tsega/b15307af018d49171dfdbde47f0d2d07)
     "type": "",
     "url": ""
   },
+  "authentication": true,
   "config": [
     {"name": "HTTP_PORT", "value":"process.env.HTTP_PORT || 8000", "comment": "HTTP PORT"},
     {"name": "MONGODB_URL", "value":"'mongodb://localhost/[app-name]'", "comment": "Mongodb URL"},
@@ -120,6 +125,7 @@ Here is a [Gist](https://gist.github.com/tsega/b15307af018d49171dfdbde47f0d2d07)
   "models": [
     {
       "name": "",
+      "authentication": ['get','post','put','delete','search'],
       "attributes": [
         {
           "name": "",

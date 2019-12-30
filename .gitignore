@@ -56,3 +56,6 @@ jspm_packages
 
 # sample settings file
 *.sample.json
+
+# VSCode project folder
+.vscode

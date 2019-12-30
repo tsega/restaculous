@@ -120,6 +120,11 @@ workflow.on('readRouterTemplate', function readRouterTemplate(cb) {
 workflow.on('replaceRouterTokens', function replaceRouterTokens(routerFile, cb) {
     var requireTokens = [];
     var initializeTokens = [];
+    var userRouterRequireToken = `var userRouter = require("./user");`;
+    var userRouterToken = `
+        // Users Endpoint
+        app.use("/users", userRouter);
+    `;
 
     appSettings.models.forEach(function(model){
         requireTokens.push("var " + model.name.toLowerCase() + "Router = require('./" + model.name.toLowerCase() + "');");
@@ -129,6 +134,10 @@ workflow.on('replaceRouterTokens', function replaceRouterTokens(routerFile, cb) 
 
     routerFile = routerFile.replace(/\{\{requireRoutes\}\}/g, requireTokens.join("\n"));
     routerFile = routerFile.replace(/\{\{initializeRoutes\}\}/g, initializeTokens.join("\n"));
+
+    // Add User routes depending on Authentication setting
+    routerFile = routerFile.replace(/\{\{requireUserRouter\}\}/g,  appSettings.authentication ? userRouterRequireToken : "");
+    routerFile = routerFile.replace(/\{\{userRouter\}\}/g,  appSettings.authentication ? userRouterToken : "");
 
     // Create the dal file
     workflow.emit('createRouterFile',routerFile, cb);
