@@ -125,7 +125,7 @@ Here is a [Gist](https://gist.github.com/tsega/b15307af018d49171dfdbde47f0d2d07)
   "models": [
     {
       "name": "",
-      "authentication": ['get','post','put','delete','search'],
+      "authentication": ["get","post","put","delete","search"],
       "attributes": [
         {
           "name": "",
