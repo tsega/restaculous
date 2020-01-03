@@ -21,7 +21,7 @@ The application generated has the following features:
   - [ ] **Authorization**
   - [ ] Wizard to generate `settings.json` file
   - [ ] Logging Integration
-  - [ ] `.env` Integration
+  - [x] `.env` Integration
   - [ ] Microservices Setup
 
 
