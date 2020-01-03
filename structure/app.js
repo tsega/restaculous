@@ -1,13 +1,14 @@
 // Load Module Dependencies
+require('dotenv').config();
 var express = require("express");
 var mongoose = require("mongoose");
 
-var config = require("./config");
+var { MONGODB_URL, HTTP_PORT } = require("./config");
 var router = require("./routes");
 
 // Connect to Mongodb
 mongoose.connect(
-  config.MONGODB_URL,
+  MONGODB_URL,
   {
     useNewUrlParser: true,
     useFindAndModify: false,
@@ -19,7 +20,7 @@ mongoose.connect(
       console.error("Connection to Mongodb Failed!");
 
       // Try to reconnect
-      mongoose.connect(config.MONGODB_URL);
+      mongoose.connect(MONGODB_URL);
     }
 
     console.log("Mongodb connected successfully");
@@ -36,8 +37,8 @@ app.use(express.json());
 router(app);
 
 // Listen to HTTP Port
-app.listen(config.HTTP_PORT, function listener() {
-  console.log("API Server running on PORT %s", config.HTTP_PORT);
+app.listen(HTTP_PORT, function listener() {
+  console.log("API Server running on PORT %s", HTTP_PORT);
 });
 
 module.exports = app;

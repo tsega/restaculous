@@ -1,6 +1,9 @@
 // Load Modules
 var bcrypt = require("bcrypt");
 
+// Configuration
+var { SALT_LENGTH } = require("../config");
+
 // Get User model
 var User = require("../models/user");
 
@@ -16,7 +19,7 @@ exports.create = function create(userData, cb) {
   console.log("creating a new User");
 
   // Hash Password
-  bcrypt.hash(userData.password, 10, (err, hash) => {
+  bcrypt.hash(userData.password, SALT_LENGTH, (err, hash) => {
     if (err) {
       return cb(err);
     }

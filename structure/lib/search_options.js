@@ -1,5 +1,5 @@
 // Load configuration file
-var config = require('../config');
+var { DEFAULT_SORT, MAX_PAGE_SIZE } = require('../config');
 
 /*
  *  GetPage
@@ -23,10 +23,10 @@ exports.getPage = function (req) {
  *  @returns {Number} the limit value in the search query or the maximum page page as set in the configuration
  */
 exports.getLimit = function (req) {
-    if (req.query.limit && req.query.limit < config.MAX_PAGE_SIZE) {
+    if (req.query.limit && req.query.limit < MAX_PAGE_SIZE) {
         return req.query.limit * 1;
     }
-    return config.MAX_PAGE_SIZE;
+    return MAX_PAGE_SIZE;
 };
 
 /*
@@ -38,7 +38,7 @@ exports.getLimit = function (req) {
  *  @returns {String} the sort value in the search query or the default sort field as set in the configuration
  */
 exports.getSort = function (req) {
-    return req.query.sort ? req.query.sort : config.DEFAULT_SORT;
+    return req.query.sort ? req.query.sort : DEFAULT_SORT;
 };
 
 /*

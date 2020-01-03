@@ -8,7 +8,7 @@ var { validationResult } =  require('express-validator');
 var UserDal = require("../dal/user");
 
 // Get Config file
-var config = require("../config");
+var { JWT_KEY } = require("../config");
 
 /*
  * Create User
@@ -106,7 +106,7 @@ exports.loginUser = function loginUser(req, res, next) {
         email: user.email,
         userId: user._id
       },
-      config.JWT_KEY,
+      JWT_KEY,
       {
         expiresIn: "1h"
       }
