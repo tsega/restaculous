@@ -57,14 +57,14 @@ workflow.on('readConfigTemplate', function readConfigTemplate(cb) {
  *  @param {workflowCallback} cb - The callback to handle end of the dals generation process.
  */
 workflow.on('replaceConfigTokens', function replaceConfigTokens(configFile, cb) {
-    var tokenReplacement = [];
+    var tokenReplacement = "";
 
     appSettings.config.forEach(function(config){
-        tokenReplacement.push("\t\t // " + config.comment);
-        tokenReplacement.push("\t\t" + config.name + ": " + config.value);
+        configValue = typeof config.value == "string" ? `"${config.value}"` : config.value;
+        tokenReplacement += `${config.name}=${configValue}\n`;
     });
 
-    configFile = configFile.replace(/\{\{configSettings\}\}/g, tokenReplacement.join(",\n"));
+    configFile = configFile.replace(/\{\{configSettings\}\}/g, tokenReplacement);
 
     // Create the dal file
     workflow.emit('createConfigFile', configFile, cb);
@@ -79,7 +79,7 @@ workflow.on('replaceConfigTokens', function replaceConfigTokens(configFile, cb) 
  *  @param {workflowCallback} cb - The callback to handle end of the dals generation process.
  */
 workflow.on('createConfigFile', function createConfigFile(configFile, cb) {
-    fs.writeFile(appSettings.directory + '/config/index.js', configFile, opts, function rf(err) {
+    fs.writeFile(appSettings.directory + '/.env', configFile, opts, function rf(err) {
         if (err) {
             // Error handling
             cb(err);

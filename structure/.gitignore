@@ -35,3 +35,6 @@ npm-debug.log
 #
 media/**/*
 docs/
+
+# Environmental Variables file
+.env

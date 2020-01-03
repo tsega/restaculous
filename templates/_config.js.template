@@ -1,5 +1,1 @@
-// Load Module Dependencies
-
-module.exports = {
 {{configSettings}}
-};
