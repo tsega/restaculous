@@ -118,3 +118,20 @@ exports.search = function search(options, cb) {
             cb(null, {{modelNamePluralToLower}});
         });
 };
+
+/**
+ * count
+ *
+ * @desc get the total or filtered count of {{modelNamePluralToLower}} in the collection.
+ *
+ * @param {Function} cb Callback for once fetch is complete
+ */
+exports.count = function count(filter, cb) {
+  {{modelName}}.countDocuments(filter, function (err, count) {
+      if (err) {
+        return cb(err);
+      }
+
+      cb(null, count);
+    });
+};

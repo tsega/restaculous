@@ -260,21 +260,56 @@ exports.searchUsers = function searchUsers(req, res, next) {
       page: req.query.page
     };
 
-    UserDal.search(opts, function(err, Users) {
+    UserDal.search(opts, function(err, users) {
       if (err) {
         // handle error
         return next(err);
       }
 
-      workflow.emit("respond", opts, Users);
+      workflow.emit("getTotalCount", opts, users);
     });
   });
 
-  workflow.on("respond", function respond(opts, Users) {
+  workflow.on("getTotalCount", function getTotalCount(opts, users) {
+    UserDal.count({}, function(err, total) {
+      if (err) {
+        // handle error
+        return next(err);
+      }
+
+      opts.total = total;
+
+      // Check if filter is an empty object, i.e. total filtered count is total count
+      if (
+        Object.keys(opts.filter).length === 0 &&
+        opts.filter.constructor === Object
+      ) {
+        opts.totalFiltered = total;
+        workflow.emit("respond", opts, users);
+      } else {
+        workflow.emit("getTotalFilteredCount", opts, users);
+      }
+    });
+  });
+
+  workflow.on("getTotalFilteredCount", function getTotalFilteredCount(opts, users) {
+    UserDal.count(opts.filter, function(err, totalFiltered) {
+      if (err) {
+        // handle error
+        return next(err);
+      }
+
+      opts.totalFiltered = totalFiltered;
+
+      workflow.emit("respond", opts, users);
+    });
+  });
+
+  workflow.on("respond", function respond(opts, users) {
     res.status(200);
     res.json({
       options: opts,
-      result: Users
+      result: users
     });
   });
 
