@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## 1.8.0
+- Add complete CRUD operation on User resource
+- Add `GetUserbyToken`
+- Add Auth Logout
 ## 1.7.5
 - Add dotenv file support
 
