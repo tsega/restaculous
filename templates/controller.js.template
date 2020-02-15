@@ -122,9 +122,45 @@ exports.search{{modelNamePlural}} = function search{{modelNamePlural}}(req, res,
                 return next(err);
             }
 
-            workflow.emit('respond', opts, {{modelNamePluralToLower}});
+            workflow.emit("getTotalCount", opts, {{modelNamePluralToLower}});
+        });
+  });
+
+  workflow.on("getTotalCount", function (opts, {{modelNamePluralToLower}}) {
+    {{modelName}}Dal.count({}, function(err, total) {
+      if (err) {
+        // handle error
+        return next(err);
+      }
+
+      opts.total = total;
+
+      // Check if filter is an empty object, i.e. total filtered count is total count
+      if (
+        Object.keys(opts.filter).length === 0 &&
+        opts.filter.constructor === Object
+      ) {
+        opts.totalFiltered = total;
+        workflow.emit("respond", opts, {{modelNamePluralToLower}});
+      } else {
+        workflow.emit("getTotalFilteredCount", opts, {{modelNamePluralToLower}});
+      }
+    });
+  });
+
+    workflow.on("getTotalFilteredCount", function (opts, users) {
+        {{modelName}}Dal.count(opts.filter, function(err, totalFiltered) {
+            if (err) {
+                // handle error
+                return next(err);
+            }
+
+            opts.totalFiltered = totalFiltered;
+
+            workflow.emit("respond", opts, {{modelNamePluralToLower}});
         });
     });
+
 
     workflow.on('respond', function respond(opts, {{modelNamePluralToLower}}) {
         res.status(200);

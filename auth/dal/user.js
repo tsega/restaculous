@@ -119,3 +119,20 @@ exports.search = function search(options, cb) {
       cb(null, users);
     });
 };
+
+/**
+ * total The total number of documents in the collection.
+ *
+ * @desc get the total number of documents in the collection
+ *
+ * @param {Function} cb Callback for once fetch is complete
+ */
+exports.count = function count(filter, cb) {
+  User.countDocuments(filter, function (err, count) {
+      if (err) {
+        return cb(err);
+      }
+
+      cb(null, count);
+    });
+};
