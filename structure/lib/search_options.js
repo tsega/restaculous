@@ -68,7 +68,8 @@ exports.getFilter = function(req) {
 
   if (Object.keys(filter).length !== 0) {
     Object.keys(filter).forEach(key => {
-      if (typeof filter[key] === "string") {
+      // Only non-ObjectId strings
+      if (typeof filter[key] === "string" && !filter[key].match(/^[a-f\d]{24}$/i)) {
         filter[key] = new RegExp(`${filter[key]}`, "i");
       }
     });

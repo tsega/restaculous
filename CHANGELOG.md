@@ -3,7 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
-
+## 1.9.1
+- Fix bug with fuzzy search and ObjectIds
 ## 1.9.0
 - Add total and filtered counts in search options
 ## 1.8.5
