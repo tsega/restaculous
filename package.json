@@ -5,6 +5,7 @@
   "type": "module",
   "main": "app.js",
   "bin": {
+    "resta": "./app.js",
     "restaculous": "./app.js"
   },
   "directories": {

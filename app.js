@@ -13,6 +13,8 @@ import * as testGenerator from "./generators/test.js";
 import * as validatorGenerator from "./generators/validator.js";
 import * as formatter from "./runners/format.js";
 import * as linter from "./runners/lint.js";
+import { HELP, parseCliArguments, VERSION } from "./cli/arguments.js";
+import { runInit } from "./cli/init.js";
 import { STATUS } from "./config/index.js";
 import { loadSettings } from "./cli/settings.js";
 import { runWorkflow } from "./cli/workflow.js";
@@ -46,21 +48,32 @@ const completionMessages = {
 };
 
 async function main() {
-  const filePath = process.argv[2];
-
-  if (!filePath) {
-    console.log(
-      chalk.yellow("%s Warning: settings.json file not provided!"),
-      STATUS.warning
-    );
-    return;
-  }
-
   try {
-    const settings = await loadSettings(filePath);
+    const options = parseCliArguments();
+
+    if (options.command === "help") {
+      console.log(HELP.trimEnd());
+      return;
+    }
+    if (options.command === "version") {
+      console.log(VERSION);
+      return;
+    }
+    if (options.command === "init") {
+      const result = await runInit({ settingsPath: options.settingsPath });
+      console.log(result.created
+        ? chalk.green(`${STATUS.success} Created ${result.path}`)
+        : chalk.yellow(`${STATUS.warning} Settings file was not changed`));
+      return;
+    }
+
+    const settings = await loadSettings(options.settingsPath);
     await runWorkflow(settings, services, reportStageComplete);
   } catch (error) {
     console.error(chalk.red(`${STATUS.error} ${error.message}`));
+    if (error.name === "CliUsageError") {
+      console.error("Run resta --help for usage.");
+    }
     process.exitCode = 1;
   }
 }
