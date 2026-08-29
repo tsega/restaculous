@@ -12,8 +12,8 @@ export const HELP = `Rest-a-culous
 Generate an opinionated Express and Mongoose REST API.
 
 Usage:
-  resta <settings-file>
-  resta generate <settings-file>
+  resta <settings-file> [--verbose]
+  resta generate <settings-file> [--verbose]
   resta init [settings-file]
   resta --help
   resta --version
@@ -25,6 +25,7 @@ Commands:
 Options:
   -h, --help       Show this help message
   -v, --version    Show the installed version
+      --verbose    Show detailed generator diagnostics
 
 The original restaculous command remains available as an alias.
 `;
@@ -44,7 +45,8 @@ export function parseCliArguments(argv = process.argv.slice(2)) {
       allowPositionals: true,
       options: {
         help: { type: "boolean", short: "h" },
-        version: { type: "boolean", short: "v" }
+        version: { type: "boolean", short: "v" },
+        verbose: { type: "boolean" }
       },
       strict: true
     });
@@ -60,6 +62,7 @@ export function parseCliArguments(argv = process.argv.slice(2)) {
   }
 
   const [command, argument, ...extra] = parsed.positionals;
+  const verbose = parsed.values.verbose ?? false;
   if (!command) {
     return { command: "help" };
   }
@@ -71,16 +74,16 @@ export function parseCliArguments(argv = process.argv.slice(2)) {
     if (!argument) {
       throw new CliUsageError("The generate command requires a settings file.");
     }
-    return { command, settingsPath: argument };
+    return { command, settingsPath: argument, verbose };
   }
 
   if (command === "init") {
-    return { command, settingsPath: argument ?? "settings.json" };
+    return { command, settingsPath: argument ?? "settings.json", verbose };
   }
 
   if (argument) {
     throw new CliUsageError(`Unknown command: ${command}`);
   }
 
-  return { command: "generate", settingsPath: command };
+  return { command: "generate", settingsPath: command, verbose };
 }

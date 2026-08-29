@@ -26,6 +26,8 @@ import {
   parseCliArguments,
   VERSION
 } from "../cli/arguments.js";
+import { createLogger, formatErrorDetails } from "../cli/logger.js";
+import { runCommand } from "../cli/run-command.js";
 
 const projectDirectory = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -68,12 +70,26 @@ test("package exposes resta with the original command as an alias", async () => 
 test("argument parser supports explicit and legacy generate commands", () => {
   assert.deepEqual(parseCliArguments(["generate", "settings.json"]), {
     command: "generate",
-    settingsPath: "settings.json"
+    settingsPath: "settings.json",
+    verbose: false
   });
   assert.deepEqual(parseCliArguments(["settings.json"]), {
     command: "generate",
-    settingsPath: "settings.json"
+    settingsPath: "settings.json",
+    verbose: false
   });
+});
+
+test("argument parser supports verbose diagnostics without changing -v", () => {
+  assert.deepEqual(
+    parseCliArguments(["generate", "settings.json", "--verbose"]),
+    {
+      command: "generate",
+      settingsPath: "settings.json",
+      verbose: true
+    }
+  );
+  assert.deepEqual(parseCliArguments(["-v"]), { command: "version" });
 });
 
 test("argument parser rejects invalid commands and options", () => {
@@ -157,6 +173,30 @@ test("CLI reports a missing settings file and exits unsuccessfully", () => {
 
   assert.equal(error?.status, 1);
   assert.match(error?.stderr, /Unable to read settings file/);
+  assert.doesNotMatch(error?.stderr, /\[verbose\]/);
+});
+
+test("CLI verbose mode reports diagnostic context for failures", () => {
+  let error;
+
+  try {
+    execFileSync(
+      process.execPath,
+      ["app.js", "missing-settings.json", "--verbose"],
+      {
+        cwd: projectDirectory,
+        encoding: "utf8",
+        stdio: "pipe"
+      }
+    );
+  } catch (caught) {
+    error = caught;
+  }
+
+  assert.equal(error?.status, 1);
+  assert.match(error?.stderr, /\[verbose\] Loading settings/);
+  assert.match(error?.stderr, /\[verbose\] Error details:/);
+  assert.match(error?.stderr, /SettingsError/);
 });
 
 test("CLI reports malformed settings JSON and exits unsuccessfully", async (t) => {
@@ -310,6 +350,71 @@ test("workflow stops immediately after a stage fails", async () => {
 
   assert.deepEqual(calls, ["structure", "models", "controllers"]);
   assert.deepEqual(completed, ["structure", "models"]);
+});
+
+test("workflow errors identify the failed stage and target application", async () => {
+  const services = createWorkflowServices([], "controllers");
+
+  await assert.rejects(
+    runWorkflow(
+      {
+        name: "Movies API",
+        directory: "/tmp/movies api",
+        authentication: false
+      },
+      services
+    ),
+    /controllers stage failed for "Movies API" in "\/tmp\/movies api"/
+  );
+});
+
+test("command failures include command, directory, and stderr", async (t) => {
+  const fixtureDirectory = await mkdtemp(
+    path.join(tmpdir(), "restaculous command test ")
+  );
+  t.after(() => rm(fixtureDirectory, { recursive: true, force: true }));
+
+  await assert.rejects(
+    new Promise((resolve, reject) => {
+      runCommand(
+        process.execPath,
+        [
+          "-e",
+          "process.stderr.write('simulated command failure');process.exit(2)"
+        ],
+        { cwd: fixtureDirectory },
+        (error) => (error ? reject(error) : resolve())
+      );
+    }),
+    (error) => {
+      assert.match(error.message, /Command .* failed in/);
+      assert.match(error.message, /simulated command failure/);
+      assert.equal(error.cwd, fixtureDirectory);
+      assert.equal(error.cause.code, 2);
+      return true;
+    }
+  );
+});
+
+test("logger only emits diagnostics in verbose mode and follows causes", () => {
+  const output = [];
+  const cause = new Error("low-level failure");
+  const error = new Error("stage failure", { cause });
+
+  createLogger({ write: (message) => output.push(message) }).debug("hidden");
+  assert.deepEqual(output, []);
+
+  const logger = createLogger({
+    verbose: true,
+    write: (message) => output.push(message)
+  });
+  logger.debug("visible");
+  logger.reportError(error);
+
+  assert.equal(output[0], "[verbose] visible");
+  assert.match(output.join("\n"), /stage failure/);
+  assert.match(output.join("\n"), /Caused by:\nError: low-level failure/);
+  assert.match(formatErrorDetails(error), /low-level failure/);
 });
 
 test("route generator emits an ES module authentication import", async (t) => {

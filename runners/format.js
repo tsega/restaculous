@@ -1,16 +1,9 @@
 /*
  *  Load module dependencies
  */
-import events from "events";
-import { exec } from "child_process";
+import events from "node:events";
 
-/*
- *  Set file options
- */
-const opts = {
-  encoding: "utf8",
-  maxBuffer: 1024 * 1024 * 10 // 10MB
-};
+import { runCommand } from "../cli/run-command.js";
 
 /*
  *  Format code base using Prettier Flow
@@ -28,17 +21,20 @@ let appSettings = {};
  *  @param {workflowCallback} cb - The callback to handle end of the formatting process.
  */
 workflow.on("runPrettier", function (cb) {
-  exec(`cd ${appSettings.directory} && npm run prettier`, function(err, stdout, stderr) {
-    if (err) {
-      console.log(stderr);
-      // Error handling
-      return cb(err);
-    }
+  runCommand(
+    "npm",
+    ["run", "prettier"],
+    { cwd: appSettings.directory },
+    function done(error, output) {
+      if (error) {
+        return cb(error);
+      }
 
-    console.log(stdout);
-    // Finish base generator workflow
-    cb(null);
-  });
+      console.log(output.stdout);
+      // Finish base generator workflow
+      cb(null);
+    }
+  );
 });
 
 export function runFormatter(settings, cb) {

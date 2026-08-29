@@ -1,4 +1,9 @@
-export async function runWorkflow(settings, services, onStageComplete = () => {}) {
+export async function runWorkflow(
+  settings,
+  services,
+  onStageComplete = () => {},
+  onStageStart = () => {}
+) {
   const stages = [
     ["structure", services.structure.generate],
     ...(settings.authentication
@@ -16,6 +21,7 @@ export async function runWorkflow(settings, services, onStageComplete = () => {}
   ];
 
   for (const [name, run] of stages) {
+    onStageStart(name);
     await runStage(name, run, settings);
     onStageComplete(name);
   }
@@ -32,7 +38,13 @@ function runStage(name, run, settings) {
       completed = true;
 
       if (error) {
-        reject(new Error(`${name} stage failed: ${error.message}`, { cause: error }));
+        const target = settings.directory
+          ? ` for "${settings.name ?? "application"}" in "${settings.directory}"`
+          : "";
+        reject(new Error(
+          `${name} stage failed${target}: ${error.message}`,
+          { cause: error }
+        ));
         return;
       }
 
