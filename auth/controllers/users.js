@@ -1,28 +1,29 @@
 // Load Module Dependencies
-var events = require("events");
-var bcrypt = require("bcrypt");
-var jwt = require("jsonwebtoken");
-var { validationResult } = require("express-validator");
+import events from "events";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { validationResult } from "express-validator";
 
 // Load Search Options library file
-var searchOptions = require("../lib/search_options");
+import * as searchOptions from "../lib/search_options.js";
 
 // Get User DAL
-var UserDal = require("../dal/user");
+import * as UserDal from "../dal/user.js";
 
 // Default fields to return on search if not provided
-var defaultFields = ["email"];
+const defaultFields = ["email"];
 
 // Get Config file
-var { JWT_KEY } = require("../config");
+import { JWT_KEY } from "../config/index.js";
 
 /*
  * Create User
  *
- *  1. Create User
- *  2. Respond
+ *  1. Validate Data
+ *  2. Create User
+ *  3. Respond
  */
-exports.createUser = function createUser(req, res, next) {
+export function createUser(req, res, next) {
   const workflow = new events.EventEmitter();
 
   workflow.on("validateData", function validateData() {
@@ -58,11 +59,11 @@ exports.createUser = function createUser(req, res, next) {
 /*
  * Login User
  *
- *  1. Find User by email
- *  2. Check User password match
+ *  1. Validate User Data
+ *  2. Login User
  *  3. Respond
  */
-exports.loginUser = function loginUser(req, res, next) {
+export function loginUser(req, res, next) {
   const workflow = new events.EventEmitter();
 
   workflow.on("validateData", function validateData() {
@@ -134,7 +135,7 @@ exports.loginUser = function loginUser(req, res, next) {
  *  2. Invalidate JWT token
  *  3. Respond
  */
-exports.logoutUser = function logoutUser(req, res, next) {
+export function logoutUser(req, res, next) {
   var workflow = new events.EventEmitter();
 
   workflow.on("validateToken", function validateToken() {
@@ -165,7 +166,7 @@ exports.logoutUser = function logoutUser(req, res, next) {
  *  2. Fetch User form database
  *  3. Respond
  */
-exports.getUser = function getUser(req, res, next) {
+export function getUser(req, res, next) {
   var workflow = new events.EventEmitter();
 
   workflow.on("validateUserId", function validateUserId() {
@@ -205,7 +206,7 @@ exports.getUser = function getUser(req, res, next) {
  *  2. Fetch User form database
  *  3. Respond
  */
-exports.getUserByToken = function getUserByToken(req, res, next) {
+export function getUserByToken(req, res, next) {
   var workflow = new events.EventEmitter();
 
   workflow.on("validateToken", function validateToken() {
@@ -241,7 +242,7 @@ exports.getUserByToken = function getUserByToken(req, res, next) {
  *  2. Fetch Users form database
  *  3. Respond
  */
-exports.searchUsers = function searchUsers(req, res, next) {
+export function searchUsers(req, res, next) {
   var workflow = new events.EventEmitter();
 
   // Set default search parameter options
@@ -323,7 +324,7 @@ exports.searchUsers = function searchUsers(req, res, next) {
  *  2. Update User in database
  *  3. Respond
  */
-exports.updateUser = function updateUser(req, res, next) {
+export function updateUser(req, res, next) {
   var workflow = new events.EventEmitter();
 
   workflow.on("validateUserData", function validateUserData() {
@@ -364,7 +365,7 @@ exports.updateUser = function updateUser(req, res, next) {
  *  2. Remove User form database
  *  3. Respond
  */
-exports.removeUser = function removeUser(req, res, next) {
+export function removeUser(req, res, next) {
   var workflow = new events.EventEmitter();
 
   workflow.on("validateUserId", function validateUserId() {
@@ -399,7 +400,7 @@ exports.removeUser = function removeUser(req, res, next) {
 };
 
 // no operation(noop) function
-exports.noop = function noop(req, res, next) {
+export function noop(req, res, next) {
   res.json({
     message: "To Implemented"
   });

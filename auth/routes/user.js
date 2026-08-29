@@ -1,19 +1,19 @@
-var express = require("express");
+import express from "express";
 
 // Get Users controller
-var Users = require("../controllers/users");
+import * as Users from "../controllers/users.js";
 
 // Get User validators
-var {
+import {
   getTokenValidator,
   getValidator,
   postValidator,
   putValidator,
   deleteValidator
-} = require("./validators/user");
+} from "./validators/user.js";
 
 // Create a router
-var router = express.Router();
+const router = express.Router();
 
 /**
  * @api {user} /users/  Create User
@@ -254,4 +254,4 @@ router.delete("/logout", getTokenValidator, Users.logoutUser);
  */
 router.delete("/:userId", deleteValidator, Users.removeUser);
 
-module.exports = router;
+export default router;

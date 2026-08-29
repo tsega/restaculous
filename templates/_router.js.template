@@ -1,11 +1,11 @@
 // Load Module Dependencies
-var express = require('express');
+import express from 'express';
 
 {{requireRoutes}}
 {{requireUserRouter}}
 
 // Export Router Initializer
-module.exports = function iniRouter(app) {
+export default function iniRouter(app) {
 // Set home rout to docs page
 app.use(express.static('docs'));
 

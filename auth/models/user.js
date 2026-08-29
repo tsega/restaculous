@@ -1,7 +1,7 @@
-var mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 // Define User attributes
-var UserSchema = mongoose.Schema(
+const UserSchema = mongoose.Schema(
   {
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true }
@@ -12,4 +12,4 @@ var UserSchema = mongoose.Schema(
 );
 
 // Export User model
-module.exports = mongoose.model("User", UserSchema);
+export default mongoose.model("User", UserSchema);

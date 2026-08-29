@@ -1,12 +1,12 @@
 // Load Module Dependencies
-var { body, param } = require("express-validator");
+import { body, param } from "express-validator";
 
 /**
  * POST Validation.
  *
  * @desc  A array of validation rules to apply on POST
  */
-exports.postValidator = [
+export const postValidator = [
   {{postFieldValidation}}
 ];
 
@@ -15,7 +15,7 @@ exports.postValidator = [
  *
  * @desc  A array of validation rules to apply on GET
  */
-exports.getValidator = [
+export const getValidator = [
   param('{{modelNameToLower}}Id', "{{modelName}} ID is required").isMongoId()
 ];
 
@@ -24,7 +24,7 @@ exports.getValidator = [
  *
  * @desc  A array of validation rules to apply on PUT
  */
-exports.putValidator = [
+export const putValidator = [
   {{putFieldValidation}}
   param('{{modelNameToLower}}Id', "{{modelName}} ID is required").isMongoId()
 ];
@@ -34,6 +34,6 @@ exports.putValidator = [
  *
  * @desc  A array of validation rules to apply on DELETE
  */
-exports.deleteValidator = [
+export const deleteValidator = [
   param('{{modelNameToLower}}Id', "{{modelName}} ID is required").isMongoId()
 ];

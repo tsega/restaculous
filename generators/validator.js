@@ -1,15 +1,20 @@
 /*
  *  Load module dependencies
  */
-var events = require('events');
-var fs = require('fs-extra');
-var clone = require('clone');
-var pluralize = require('pluralize');
+import events from 'events';
+import fs from 'fs-extra';
+import clone from 'clone';
+import pluralize from 'pluralize';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /*
  *  Set file options
  */
-var opts = {
+const opts = {
     encoding: 'utf8'
 };
 
@@ -21,8 +26,8 @@ var opts = {
  *  3. Create validator file
  *  4. Iterate through steps 1-4 until all validator files are generated
  */
-var workflow = new events.EventEmitter();
-var appSettings = {};
+const workflow = new events.EventEmitter();
+let appSettings = {};
 
 /*
  *  readValidatorTemplate
@@ -33,16 +38,16 @@ var appSettings = {};
  *  @param {workflowCallback} cb - The callback to handle end of the models generation process.
  */
 workflow.on('readValidatorTemplate', function (models, cb) {
-    var allModels = clone(models);
+    let allModels = clone(models);
 
     // Make sure that all models have been generated
     if (allModels.length) {
-        var currentModel = allModels.pop();
+        let currentModel = allModels.pop();
 
         fs.readFile(__dirname + '/../templates/validator.js.template', opts, function rf(err, validatorFile) {
             if (err) {
                 // Error handling
-                cb(err);
+                return cb(err);
             }
 
             // Replace the file tokens
@@ -97,7 +102,7 @@ workflow.on('createValidatorFile', function createValidatorFile(models, currentM
     fs.writeFile(getValidatorFileName(currentModel.name), validatorFile, opts, function rf(err, data) {
         if (err) {
             // Error handling
-            cb(err);
+            return cb(err);
         }
 
         // This is called to iterate through all models
@@ -126,7 +131,7 @@ function getValidatorFileName(modelName){
  *  @returns {String} the replacement string to put in documentation
  */
 function postFieldValidation(model) {
-    var tokenReplacement = "";
+    let tokenReplacement = "";
 
     model.attributes.forEach(function (attribute) {
         // Validation based on setting
@@ -151,12 +156,12 @@ function postFieldValidation(model) {
  *  @returns {String} the replacement string to put in documentation
  */
 function putFieldValidation(model) {
-  var tokenReplacement = "";
+  let tokenReplacement = "";
 
   model.attributes.forEach(function (attribute) {
       // Validation based on setting
       if(attribute.validation) {
-        var validatorList = attribute.validation.filter(o => !["isEmpty", "notEmpty"].includes(o.type));
+        let validatorList = attribute.validation.filter(o => !["isEmpty", "notEmpty"].includes(o.type));
 
         validatorList.forEach(function(option) {
           if(option.type.includes)
@@ -171,7 +176,7 @@ function putFieldValidation(model) {
   return tokenReplacement;
 }
 
-exports.generate = function generateValidators(settings, cb) {
+export function generate(settings, cb) {
     appSettings = settings;
     workflow.emit('readValidatorTemplate', appSettings.models, cb);
 };

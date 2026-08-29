@@ -1,5 +1,5 @@
 // Load configuration file
-var { DEFAULT_SORT, MAX_PAGE_SIZE } = require("../config");
+import { DEFAULT_SORT, MAX_PAGE_SIZE } from "../config/index.js";
 
 /*
  *  GetPage
@@ -9,7 +9,7 @@ var { DEFAULT_SORT, MAX_PAGE_SIZE } = require("../config");
  *  @params {Object} req - the request object containing the search query
  *  @returns {Number} the page search query or the default starting page, i.e. 0
  */
-exports.getPage = function(req) {
+export function getPage(req) {
   return req.query.page ? req.query.page * 1 : 1;
 };
 
@@ -21,7 +21,7 @@ exports.getPage = function(req) {
  *  @params {Object} req - the request object containing the search query
  *  @returns {Number} the limit value in the search query or the maximum page page as set in the configuration
  */
-exports.getLimit = function(req) {
+export function getLimit(req) {
   if (req.query.limit && req.query.limit < MAX_PAGE_SIZE) {
     return req.query.limit * 1;
   }
@@ -36,7 +36,7 @@ exports.getLimit = function(req) {
  *  @params {Object} req - the request object containing the search query
  *  @returns {String} the sort value in the search query or the default sort field as set in the configuration
  */
-exports.getSort = function(req) {
+export function getSort(req) {
   return req.query.sort ? req.query.sort : DEFAULT_SORT;
 };
 
@@ -49,7 +49,7 @@ exports.getSort = function(req) {
  *  @params {Object} req - the request object containing the search query
  *  @returns {string} the fields to return or the default sort field as set in the controller
  */
-exports.getFields = function(req, defaultFields) {
+export function getFields(req, defaultFields) {
   return req.query.fields
     ? req.query.fields.split(",").join(" ")
     : defaultFields.join(" ");
@@ -63,7 +63,7 @@ exports.getFields = function(req, defaultFields) {
  *  @params {Object} req - the request object containing the search query
  *  @returns {Object} the filter condition from the search query or an empty object
  */
-exports.getFilter = function(req) {
+export function getFilter(req) {
   let filter = req.query.filter ? JSON.parse(req.query.filter.trim()) : {};
 
   if (Object.keys(filter).length !== 0) {

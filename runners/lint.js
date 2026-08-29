@@ -1,14 +1,15 @@
 /*
  *  Load module dependencies
  */
-var events = require("events");
-var { exec } = require("child_process");
+import events from "events";
+import { exec } from "child_process";
 
 /*
  *  Set file options
  */
-var opts = {
-  encoding: "utf8"
+const opts = {
+  encoding: "utf8",
+  maxBuffer: 1024 * 1024 * 10 // 10MB
 };
 
 /*
@@ -16,8 +17,8 @@ var opts = {
  *
  *  Run eslint
  */
-var workflow = new events.EventEmitter();
-var appSettings = {};
+const workflow = new events.EventEmitter();
+let appSettings = {};
 
 /*
  *  runEsLint
@@ -31,7 +32,7 @@ workflow.on("runEsLint", function (cb) {
     if (err) {
       console.log(stderr);
       // Error handling
-      cb(err);
+      return cb(err);
     }
 
     console.log(stdout);
@@ -40,7 +41,7 @@ workflow.on("runEsLint", function (cb) {
   });
 });
 
-exports.runLinter = function (settings, cb) {
+export function runLinter(settings, cb) {
   appSettings = settings;
   workflow.emit("runEsLint", cb);
 };

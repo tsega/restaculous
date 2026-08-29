@@ -1,34 +1,23 @@
 // Load Module Dependencies
-require('dotenv').config();
-var express = require("express");
-var mongoose = require("mongoose");
+import dotenv from 'dotenv';
+dotenv.config();
+import express from "express";
+import mongoose from "mongoose";
 
-var { MONGODB_URL, HTTP_PORT } = require("./config");
-var router = require("./routes");
+import { MONGODB_URL, HTTP_PORT } from "./config/index.js";
+import router from "./routes/index.js";
 
 // Connect to Mongodb
-mongoose.connect(
-  MONGODB_URL,
-  {
-    useNewUrlParser: true,
-    useFindAndModify: false,
-    useUnifiedTopology: true,
-    useCreateIndex: true
-  },
-  function(err) {
-    if (err) {
-      console.error("Connection to Mongodb Failed!");
-
-      // Try to reconnect
-      mongoose.connect(MONGODB_URL);
-    }
-
+mongoose.connect(MONGODB_URL)
+  .then(() => {
     console.log("Mongodb connected successfully");
-  }
-);
+  })
+  .catch((err) => {
+    console.error("Connection to Mongodb Failed!", err);
+  });
 
 // Initialize app
-var app = express();
+const app = express();
 
 // Set Middleware
 app.use(express.json());
@@ -41,4 +30,4 @@ app.listen(HTTP_PORT, function listener() {
   console.log("API Server running on PORT %s", HTTP_PORT);
 });
 
-module.exports = app;
+export default app;

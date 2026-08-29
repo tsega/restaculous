@@ -1,11 +1,11 @@
 // Load Modules
-var bcrypt = require("bcrypt");
+import bcrypt from "bcrypt";
 
 // Configuration
-var { SALT_LENGTH } = require("../config");
+import { SALT_LENGTH } from "../config/index.js";
 
 // Get User model
-var User = require("../models/user");
+import User from "../models/user.js";
 
 /**
  * create a new user.
@@ -15,7 +15,7 @@ var User = require("../models/user");
  * @param {Object}   userData  Data for the User to create
  * @param {Function} cb     Callback for once saving is complete
  */
-exports.create = function create(userData, cb) {
+export function create(userData, cb) {
   console.log("creating a new User");
 
   // Hash Password
@@ -26,14 +26,9 @@ exports.create = function create(userData, cb) {
     // Create User
     userData.password = hash;
 
-    User.create(userData, function createUser(err, user) {
-      if (err) {
-        return cb(err);
-      }
-
-      // TODO: Remove private fields`
-      cb(null, user);
-    });
+    User.create(userData)
+      .then(user => cb(null, user))
+      .catch(err => cb(err));
   });
 };
 
@@ -45,15 +40,11 @@ exports.create = function create(userData, cb) {
  * @param {Object}  query   Query Object
  * @param {Function} cb Callback for once delete is complete
  */
-exports.remove = function remove(query, cb) {
+export function remove(query, cb) {
   console.log("deleting user: ", query);
-  User.findOneAndRemove(query, function deleteUser(err, user) {
-    if (err) {
-      return cb(err);
-    }
-
-    cb(null, user);
-  });
+  User.findOneAndDelete(query)
+    .then(user => cb(null, user))
+    .catch(err => cb(err));
 };
 
 /**
@@ -65,17 +56,12 @@ exports.remove = function remove(query, cb) {
  * @param {Object} updates  Update data
  * @param {Function} cb Callback for once update is complete
  */
-exports.update = function update(query, updates, cb) {
+export function update(query, updates, cb) {
   console.log("updating user: ", query);
 
   User.findOneAndUpdate(query, { $set: updates }, { new: true }) // option to return the new document
-    .exec(function updateUser(err, user) {
-      if (err) {
-        return cb(err);
-      }
-
-      cb(null, user || {});
-    });
+    .then(user => cb(null, user || {}))
+    .catch(err => cb(err));
 };
 
 /**
@@ -86,15 +72,12 @@ exports.update = function update(query, updates, cb) {
  * @param {Object} query Query Object
  * @param {Function} cb Callback for once fetch is complete
  */
-exports.get = function get(query, cb) {
+export function get(query, cb) {
   console.log("getting User ", query);
 
-  User.findOne(query).exec(function(err, user) {
-    if (err) {
-      return cb(err);
-    }
-    cb(null, user || {});
-  });
+  User.findOne(query)
+    .then(user => cb(null, user || {}))
+    .catch(err => cb(err));
 };
 
 /**
@@ -105,19 +88,14 @@ exports.get = function get(query, cb) {
  * @param {Object} query Query Object
  * @param {Function} cb Callback for once fetch is complete
  */
-exports.search = function search(options, cb) {
+export function search(options, cb) {
   console.log("Searching a collection of users");
   User.find(options.filter, options.fields)
     .sort(options.sort)
     .limit(options.limit)
     .skip(options.limit * (options.page - 1))
-    .exec(function searchUsers(err, users) {
-      if (err) {
-        return cb(err);
-      }
-
-      cb(null, users);
-    });
+    .then(users => cb(null, users))
+    .catch(err => cb(err));
 };
 
 /**
@@ -127,12 +105,8 @@ exports.search = function search(options, cb) {
  *
  * @param {Function} cb Callback for once fetch is complete
  */
-exports.count = function count(filter, cb) {
-  User.countDocuments(filter, function (err, count) {
-      if (err) {
-        return cb(err);
-      }
-
-      cb(null, count);
-    });
+export function count(filter, cb) {
+  User.countDocuments(filter)
+    .then(count => cb(null, count))
+    .catch(err => cb(err));
 };

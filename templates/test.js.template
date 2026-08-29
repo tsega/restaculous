@@ -1,9 +1,9 @@
 // Load Module Dependencies
-var request = require('supertest');
-var expect = require('chai').expect;
+import request from 'supertest';
+import { expect } from 'chai';
 
 // Load application
-var app = require('../app');
+import app from '../app.js';
 
 describe('{{modelName}} Endpoint', function () {
     var {{modelNameToLower}};
