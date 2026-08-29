@@ -137,11 +137,15 @@ You can generate an entire application by simply supplying a **json** settings f
       "attributes": [
         {
           "name": "[name of the attribute]",
-          "type": "[the data type of the attribute]",
+          "type": "[String, Number, Boolean, or Date]",
           "desc": "[a small description about the attribute]",
           "example": "[an example of the attribute]",
           "validation": [
-            { "type": "[based on Express Validator]" , "message": "[message to show when validation fails]"}
+            {
+              "type": "[supported validation rule]",
+              "message": "[message to show when validation fails]",
+              "args": [{"min": 2, "max": 100}]
+            }
           ],
           "isPrivate": "[indicates the attribute will not be returned, e.g. password (optional)]",
           "isAuto": "[indicates that the value for the attribute will be generated automatically]"
@@ -156,7 +160,24 @@ You can generate an entire application by simply supplying a **json** settings f
 }
 ```
 
-> Note: For details on the **Express Validator** validators, please look at its [documentation on GitHub](https://github.com/validatorjs/validator.js#validators).
+### Supported fields and validation
+
+Generated model fields support the common Mongoose scalar types `String`,
+`Number`, `Boolean`, and `Date`. Store uploaded-file URLs or external storage
+identifiers as strings; multipart upload handling is intentionally outside the
+generator's scope.
+
+The supported validation rules are:
+
+- `String`: `notEmpty`, `isString`, `isEmail`, `isURL`, and `isLength`
+- `Number`: `notEmpty`, `isNumeric`, `isInt`, and `isFloat`
+- `Boolean`: `notEmpty` and `isBoolean`
+- `Date`: `notEmpty` and `isISO8601`
+
+`isLength` requires one `args` object containing `min`, `max`, or both.
+`isInt` and `isFloat` accept an optional range object. Other rules do not
+accept arguments. Invalid types, rules, arguments, and incompatible
+field/rule combinations are rejected before generation begins.
 
 Here is a [Gist](https://gist.github.com/tsega/b15307af018d49171dfdbde47f0d2d07) with an example `settings.json` file.
 
@@ -200,7 +221,7 @@ Here is a [Gist](https://gist.github.com/tsega/b15307af018d49171dfdbde47f0d2d07)
           "desc": "",
           "example": "",
           "validation": [
-            { "type": "", "message": "" }
+            { "type": "notEmpty", "message": "This field is required" }
           ]
         }
       ]

@@ -23,6 +23,7 @@ describe("{{modelName}} endpoints", () => {
 
     assert.ok(response.body._id);
   });
+{{validationTests}}
 {{/post}}
 {{#get}}
   it("gets a {{modelNameToLower}} by ID", async () => {
@@ -58,6 +59,7 @@ describe("{{modelName}} endpoints", () => {
 
     assert.equal(response.body._id, existing.id);
   });
+{{optionalValidationTest}}
 {{/put}}
 {{#delete}}
   it("deletes a {{modelNameToLower}}", async () => {

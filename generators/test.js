@@ -7,6 +7,7 @@ import clone from 'clone';
 import pluralize from 'pluralize';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { getInvalidValidationValue } from '../cli/field-validation.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -88,6 +89,11 @@ workflow.on('replaceTestTokens', function replaceTestTokens(models, currentModel
     testFile = testFile.replace(/\{\{authToken\}\}/g, appSettings.authentication
         ? '`Bearer ${jwt.sign({ sub: "test-user" }, JWT_KEY)}`'
         : '""');
+    testFile = testFile.replace(/\{\{validationTests\}\}/g, validationTests(currentModel));
+    testFile = testFile.replace(
+        /\{\{optionalValidationTest\}\}/g,
+        optionalValidationTest(currentModel)
+    );
 
     const routes = currentModel.routes ?? ["post", "get", "search", "put", "delete"];
     for (const action of ["post", "get", "search", "put", "delete"]) {
@@ -134,11 +140,51 @@ function modelFields(model) {
     let tokenReplacement = [];
 
     model.attributes.forEach(function (attribute) {
-        // TODO: check the output to be string or int
-        tokenReplacement.push("\t\t" + attribute.name + ":'" + attribute.example + "'");
+        tokenReplacement.push(`  ${JSON.stringify(attribute.name)}: ${JSON.stringify(attribute.example)}`);
     });
 
     return tokenReplacement.join(",\n") ;
+}
+
+function validationTests(model) {
+    const route = pluralize(model.name.toLowerCase());
+    const tests = [];
+
+    model.attributes.forEach(function (attribute) {
+        attribute.validation.forEach(function (validation) {
+            const invalidValue = JSON.stringify(getInvalidValidationValue(validation));
+            tests.push(`
+  it("rejects invalid ${attribute.name} values for ${validation.type}", async () => {
+    await request(app)
+      .post("/${route}")
+      .set("Authorization", authorization)
+      .send({ ...sampleDocument, ${JSON.stringify(attribute.name)}: ${invalidValue} })
+      .expect(422);
+  });`);
+        });
+    });
+
+    return tests.join("\n");
+}
+
+function optionalValidationTest(model) {
+    const hasValidation = model.attributes.some(
+        (attribute) => attribute.validation.length > 0
+    );
+    if (!hasValidation) {
+        return "";
+    }
+
+    return `
+  it("allows validated fields to be omitted when updating", async () => {
+    const existing = await ${model.name}.create(sampleDocument);
+
+    await request(app)
+      .put(\`/${pluralize(model.name.toLowerCase())}/\${existing.id}\`)
+      .set("Authorization", authorization)
+      .send({})
+      .expect(200);
+  });`;
 }
 
 /*
