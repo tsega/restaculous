@@ -183,6 +183,7 @@ Here is a [Gist](https://gist.github.com/tsega/b15307af018d49171dfdbde47f0d2d07)
   "config": [
     {"name": "HTTP_PORT", "value": 8000, "comment": "HTTP port"},
     {"name": "MONGODB_URL", "value":"mongodb://127.0.0.1:27017/[app-name]", "comment": "MongoDB URL"},
+    {"name": "TEST_MONGODB_URL", "value":"mongodb://127.0.0.1:27017/[app-name]-test", "comment": "MongoDB test URL"},
     {"name": "SALT_LENGTH", "value": 12, "comment": "Password hash rounds"},
     {"name": "JWT_KEY", "value":"change-me", "comment": "JWT signing secret"},
     {"name": "MAX_PAGE_SIZE", "value": 100, "comment": "Maximum search page size"},
