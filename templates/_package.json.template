@@ -12,7 +12,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "node --import ./test/setup.js --test test/*.test.js",
+    "test": "node --import ./test/setup.js --test --test-concurrency=1 test/*.test.js",
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "prettier": "prettier --write .",

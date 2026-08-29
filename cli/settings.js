@@ -132,6 +132,11 @@ function defaultConfig(name) {
       value: `mongodb://127.0.0.1:27017/${databaseName}`,
       comment: "MongoDB connection URL"
     },
+    {
+      name: "TEST_MONGODB_URL",
+      value: `mongodb://127.0.0.1:27017/${databaseName}-test`,
+      comment: "MongoDB connection URL used only by tests"
+    },
     { name: "SALT_LENGTH", value: 12, comment: "Password hash rounds" },
     { name: "JWT_KEY", value: "change-me", comment: "JWT signing secret" },
     { name: "MAX_PAGE_SIZE", value: 100, comment: "Maximum search page size" },

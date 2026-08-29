@@ -276,6 +276,10 @@ test("settings validation supplies defaults for minimal configuration", () => {
     settings.config.find(({ name }) => name === "MONGODB_URL").value,
     "mongodb://127.0.0.1:27017/movies-api"
   );
+  assert.equal(
+    settings.config.find(({ name }) => name === "TEST_MONGODB_URL").value,
+    "mongodb://127.0.0.1:27017/movies-api-test"
+  );
 });
 
 test("models generate all CRUD routes by default", () => {
@@ -586,6 +590,10 @@ test("generators produce a clean src-based application without a DAL", async (t)
   );
   assert.match(environmentExample, /# MongoDB connection URL/);
   assert.match(environmentExample, /MONGODB_URL=/);
+  assert.match(
+    environmentExample,
+    /TEST_MONGODB_URL="mongodb:\/\/127\.0\.0\.1:27017\/movies-test"/
+  );
   assert.match(environmentExample, /JWT_KEY=\n/);
   assert.doesNotMatch(environmentExample, /JWT_KEY=.*change-me/);
 
@@ -594,6 +602,20 @@ test("generators produce a clean src-based application without a DAL", async (t)
     "utf8"
   );
   assert.match(generatedApp, /app\.use\(requestLogger\)/);
+
+  const testSetup = await readFile(
+    path.join(outputDirectory, "test/setup.js"),
+    "utf8"
+  );
+  assert.match(testSetup, /required\("TEST_MONGODB_URL"\)/);
+  assert.match(testSetup, /TEST_MONGODB_URL must differ from MONGODB_URL/);
+  assert.match(testSetup, /mongoose\.connection\.dropDatabase\(\)/);
+  assert.doesNotMatch(testSetup, /mongoose\.connect\(MONGODB_URL\)/);
+
+  const generatedPackage = JSON.parse(
+    await readFile(path.join(outputDirectory, "package.json"), "utf8")
+  );
+  assert.match(generatedPackage.scripts.test, /--test-concurrency=1/);
 
   const files = execFileSync("find", [outputDirectory, "-name", "*.js"], {
     encoding: "utf8"
