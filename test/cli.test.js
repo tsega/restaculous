@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
+import { EventEmitter } from "node:events";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -28,6 +29,7 @@ import {
 } from "../cli/arguments.js";
 import { createLogger, formatErrorDetails } from "../cli/logger.js";
 import { runCommand } from "../cli/run-command.js";
+import { requestLogger } from "../structure/src/middleware/request-logger.js";
 
 const projectDirectory = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -417,6 +419,64 @@ test("logger only emits diagnostics in verbose mode and follows causes", () => {
   assert.match(formatErrorDetails(error), /low-level failure/);
 });
 
+test("generated configuration rejects invalid numeric environment values", () => {
+  const configUrl = new URL(
+    "../structure/src/config/index.js",
+    import.meta.url
+  ).href;
+  let error;
+
+  try {
+    execFileSync(
+      process.execPath,
+      ["--input-type=module", "--eval", `await import(${JSON.stringify(configUrl)})`],
+      {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          HTTP_PORT: "not-a-port",
+          MONGODB_URL: "mongodb://127.0.0.1:27017/test",
+          JWT_KEY: "test-key"
+        },
+        stdio: "pipe"
+      }
+    );
+  } catch (caught) {
+    error = caught;
+  }
+
+  assert.notEqual(error, undefined);
+  assert.match(error.stderr, /Invalid environment variable HTTP_PORT/);
+});
+
+test("generated request logger excludes query values and headers", () => {
+  const output = [];
+  const originalLog = console.log;
+  const response = new EventEmitter();
+  response.statusCode = 200;
+
+  try {
+    console.log = (message) => output.push(message);
+    requestLogger(
+      {
+        method: "GET",
+        path: "/movies",
+        originalUrl: "/movies?token=secret",
+        headers: { authorization: "Bearer secret" }
+      },
+      response,
+      () => {}
+    );
+    response.emit("finish");
+  } finally {
+    console.log = originalLog;
+  }
+
+  assert.match(output[0], /INFO HTTP request completed/);
+  assert.match(output[0], /method="GET" path="\/movies" status=200/);
+  assert.doesNotMatch(output[0], /token|secret|authorization/i);
+});
+
 test("route generator emits an ES module authentication import", async (t) => {
   const outputDirectory = await mkdtemp(
     path.join(tmpdir(), "restaculous-cli-test-")
@@ -500,7 +560,10 @@ test("generators produce a clean src-based application without a DAL", async (t)
     "src/routes/movie.js",
     "src/services/auth.js",
     "src/middleware/errors.js",
+    "src/middleware/request-logger.js",
+    "src/utils/logger.js",
     "test/movie.test.js",
+    ".env.example",
     "package.json"
   ];
   for (const file of expectedFiles) {
@@ -516,6 +579,21 @@ test("generators produce a clean src-based application without a DAL", async (t)
   assert.match(movieRoute, /router\.get\("\/search"/);
   assert.match(movieRoute, /router\.get\("\/:movieId"/);
   assert.doesNotMatch(movieRoute, /router\.(post|put|delete)\(/);
+
+  const environmentExample = await readFile(
+    path.join(outputDirectory, ".env.example"),
+    "utf8"
+  );
+  assert.match(environmentExample, /# MongoDB connection URL/);
+  assert.match(environmentExample, /MONGODB_URL=/);
+  assert.match(environmentExample, /JWT_KEY=\n/);
+  assert.doesNotMatch(environmentExample, /JWT_KEY=.*change-me/);
+
+  const generatedApp = await readFile(
+    path.join(outputDirectory, "src/app.js"),
+    "utf8"
+  );
+  assert.match(generatedApp, /app\.use\(requestLogger\)/);
 
   const files = execFileSync("find", [outputDirectory, "-name", "*.js"], {
     encoding: "utf8"
