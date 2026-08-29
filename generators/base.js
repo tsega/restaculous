@@ -63,16 +63,21 @@ workflow.on('readConfigTemplate', function readConfigTemplate(cb) {
  */
 workflow.on('replaceConfigTokens', function replaceConfigTokens(configFile, cb) {
     let tokenReplacement = "";
+    let exampleReplacement = "";
 
     appSettings.config.forEach(function(config){
         let configValue = typeof config.value == "string" ? `"${config.value}"` : config.value;
+        const comment = config.comment ? `# ${config.comment}\n` : "";
         tokenReplacement += `${config.name}=${configValue}\n`;
+        const exampleValue = isSensitive(config.name) ? "" : configValue;
+        exampleReplacement += `${comment}${config.name}=${exampleValue}\n`;
     });
 
     configFile = configFile.replace(/\{\{configSettings\}\}/g, tokenReplacement);
+    const exampleFile = configFile.replace(tokenReplacement, exampleReplacement);
 
     // Create the environment file
-    workflow.emit('createConfigFile', configFile, cb);
+    workflow.emit('createConfigFile', configFile, exampleFile, cb);
 });
 
 /*
@@ -83,17 +88,27 @@ workflow.on('replaceConfigTokens', function replaceConfigTokens(configFile, cb) 
  *  @param {string}  configFile - The string version of the template file.
  *  @param {workflowCallback} cb - The callback to handle end of the dals generation process.
  */
-workflow.on('createConfigFile', function createConfigFile(configFile, cb) {
+workflow.on('createConfigFile', function createConfigFile(configFile, exampleFile, cb) {
     fs.writeFile(appSettings.directory + '/.env', configFile, opts, function rf(err) {
         if (err) {
             // Error handling
             return cb(err);
         }
 
-        // Move to generating the routes/index.js file
-        workflow.emit('readRouterTemplate', cb);
+        fs.writeFile(appSettings.directory + '/.env.example', exampleFile, opts, function writeExample(exampleError) {
+            if (exampleError) {
+                return cb(exampleError);
+            }
+
+            // Move to generating the routes/index.js file
+            workflow.emit('readRouterTemplate', cb);
+        });
     });
 });
+
+function isSensitive(name) {
+    return /(KEY|SECRET|PASSWORD|TOKEN|CREDENTIAL)/i.test(name);
+}
 
 /*
  *  readRouterTemplate

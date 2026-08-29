@@ -1,3 +1,5 @@
+import { logger } from "../utils/logger.js";
+
 export function notFoundHandler(req, res) {
   void req;
   res.status(404).json({ error: "Route not found" });
@@ -9,7 +11,12 @@ export function errorHandler(error, req, res, next) {
   const status = getStatus(error);
 
   if (status >= 500) {
-    console.error(error);
+    logger.error("Request failed", {
+      method: req.method,
+      path: req.path,
+      status,
+      error
+    });
   }
 
   res.status(status).json({
