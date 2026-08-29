@@ -74,7 +74,11 @@ workflow.on('replaceModelTokens', function replaceModelTokens(models, currentMod
 
     if (currentModel.attributes.length) {
         currentModel.attributes.forEach(function (attribute) {
-            modelSchema.push("\t\t" + attribute.name + ": {type: " + attribute.type + "}");
+            const options = [`type: ${attribute.type}`];
+            if (attribute.isPrivate) {
+                options.push("select: false");
+            }
+            modelSchema.push("\t\t" + attribute.name + ": { " + options.join(", ") + " }");
         });
     }
 
@@ -133,7 +137,7 @@ function getRelatedModelSchemaEntry(relation){
  *  @returns {String} the full path of the model file.
  */
 function getModelFileName(modelName){
-    return appSettings.directory + "/models/" + modelName.toLowerCase() + '.js' ;
+    return appSettings.directory + "/src/models/" + modelName.toLowerCase() + '.js' ;
 }
 
 export const generate = function generateModels(settings, cb) {

@@ -5,9 +5,7 @@ import chalk from "chalk";
 import * as authGenerator from "./generators/auth.js";
 import * as baseGenerator from "./generators/base.js";
 import * as controllerGenerator from "./generators/controller.js";
-import * as dalGenerator from "./generators/dal.js";
 import * as dependenciesInstaller from "./generators/dependencies.js";
-import * as documentationGenerator from "./generators/documentation.js";
 import * as modelGenerator from "./generators/model.js";
 import * as routeGenerator from "./generators/route.js";
 import * as structureGenerator from "./generators/structure.js";
@@ -23,14 +21,12 @@ const services = {
   structure: structureGenerator,
   authentication: authGenerator,
   models: modelGenerator,
-  dals: dalGenerator,
   controllers: controllerGenerator,
   routes: routeGenerator,
   validators: validatorGenerator,
   tests: testGenerator,
   base: baseGenerator,
   dependencies: dependenciesInstaller,
-  documentation: documentationGenerator,
   format: formatter,
   lint: linter
 };
@@ -39,14 +35,12 @@ const completionMessages = {
   structure: "Done Generating App Structure",
   authentication: "Done Generating Authentication",
   models: "Done Generating Models",
-  dals: "Done Generating Dals",
   controllers: "Done Generating Controllers",
   routes: "Done Generating Routes",
   validators: "Done Generating Validators",
   tests: "Done Generating Tests",
   base: "Done Generating config/index.js, routes/index.js and package.json",
   dependencies: "Done Installing Dependencies",
-  documentation: "Done Generating Documentation",
   format: "Done Formatting Code",
   lint: "Done Linting Code"
 };

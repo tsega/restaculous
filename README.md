@@ -39,7 +39,7 @@ The application generated has the following features:
 
   - [x] Fully tested API endpoints with **CRUD** operations
   - [x] Express-Validator Integration
-  - [x] Automatically generate API documentation
+  - [ ] OpenAPI documentation
   - [x] Linting of source to ensure proper code formatting
   - [x] **Authentication**
   - [ ] **Authorization**
@@ -54,19 +54,19 @@ The generate application structure looks as follows.
 ```
 ..
 .
- |--config/                 # configuration settings
- |--controllers/            # controllers based on models
- |--dal/                    # data access layer containing abstractions over models
- |--docs/                    # Auto-generated documentation for API endpoints
- |--lib/                    # utility library to do common tasks
- |--models/                 # the underlying models of the system
- |--routes/                 # REST-based API endpoints
-   |--validators/           # Validators for API endpoints
- |--test/                   # tests for the entire code base
- |--.gitignore              # common file and folders to ignore by git
- |--app.js                  # the applications main entry point
- |--package.json            # specifies modules/packages used in the app
- |--README.md               # an introductory text about the application
+ |--src/
+   |--config/               # environment-backed configuration
+   |--controllers/          # HTTP request and response handling
+   |--middleware/           # validation, authentication, and errors
+   |--models/               # Mongoose schemas and models
+   |--routes/               # REST endpoints and validators
+   |--services/             # business operations such as authentication
+   |--utils/                # shared query and HTTP helpers
+   |--app.js                # Express application construction
+   |--server.js             # database connection and server startup
+ |--test/                   # generated API tests
+ |--.env                    # local environment configuration
+ |--package.json            # application scripts and dependencies
 ```
 
 ## Generate from a `settings.json` file
@@ -92,6 +92,7 @@ You can generate an entire application by simply supplying a **json** settings f
   "models": [
     {
       "name": "[model name(capitalized)]",
+      "routes": "[0 or more of 'get','post','put','delete','search']",
       "authentication": "[0 or more of the following 'get','post','put','delete','search']",
       "attributes": [
         {
@@ -121,9 +122,10 @@ Here is a [Gist](https://gist.github.com/tsega/b15307af018d49171dfdbde47f0d2d07)
 
 > **Important:**
  - The top level `authentication` (Boolean) property adds token based authentication to the application.
+ - The model level `routes` array controls which CRUD endpoints are generated. It defaults to all supported actions.
  - The model level `authentication` (Array of Action Names) property specifies the API endpoints that require authentication to access. If you don't want authentication added, this key needs to be removed or left as an empty array.
  - Timestamp attributes, i.e. `createdAt` and `updatedAt` are automatically added to all models.
- - All settings fields in the above example are required except the ones identified as being optional. All **configuration entries** are mandatory; a starter `settings.json` file is given below:
+ - Only `name` and `directory` are required. Repository metadata, configuration, authentication, models, attributes, relations, and route lists have defaults.
 
 **DON'T FORGET TO REPLACE [app-name]**
 
@@ -139,12 +141,12 @@ Here is a [Gist](https://gist.github.com/tsega/b15307af018d49171dfdbde47f0d2d07)
   },
   "authentication": true,
   "config": [
-    {"name": "HTTP_PORT", "value":"process.env.HTTP_PORT || 8000", "comment": "HTTP PORT"},
-    {"name": "MONGODB_URL", "value":"'mongodb://localhost/[app-name]'", "comment": "Mongodb URL"},
-    {"name": "SALT_LENGTH", "value":"13", "comment": "SALT VALUE LENGTH"},
-    {"name": "TOKEN_LENGTH", "value":"253", "comment": "TOKEN LENGTH"},
-    {"name": "MAX_PAGE_SIZE", "value":"100", "comment": "DEFAULT PAGE SIZE"},
-    {"name": "DEFAULT_SORT", "value":"'updatedAt'", "comment": "DEFAULT SORT FIELD"}
+    {"name": "HTTP_PORT", "value": 8000, "comment": "HTTP port"},
+    {"name": "MONGODB_URL", "value":"mongodb://127.0.0.1:27017/[app-name]", "comment": "MongoDB URL"},
+    {"name": "SALT_LENGTH", "value": 12, "comment": "Password hash rounds"},
+    {"name": "JWT_KEY", "value":"change-me", "comment": "JWT signing secret"},
+    {"name": "MAX_PAGE_SIZE", "value": 100, "comment": "Maximum search page size"},
+    {"name": "DEFAULT_SORT", "value":"-updatedAt", "comment": "Default sort"}
   ],
   "models": [
     {
@@ -165,3 +167,20 @@ Here is a [Gist](https://gist.github.com/tsega/b15307af018d49171dfdbde47f0d2d07)
   ]
 }
 ```
+
+### Minimal settings
+
+Only the application name and output directory are required. Authentication is
+disabled, the model list is empty, repository metadata is blank, and common
+environment settings receive defaults:
+
+```json
+{
+  "name": "movies-api",
+  "directory": "./movies-api"
+}
+```
+
+Settings are validated with Zod before any files are generated. Invalid fields
+are reported together, so generation never starts with a partially valid
+configuration.

@@ -85,6 +85,15 @@ workflow.on('replaceTestTokens', function replaceTestTokens(models, currentModel
 
     // Model sample document from fields
     testFile = testFile.replace(/\{\{modelFields\}\}/g, modelFields(currentModel));
+    testFile = testFile.replace(/\{\{authToken\}\}/g, appSettings.authentication
+        ? '`Bearer ${jwt.sign({ sub: "test-user" }, JWT_KEY)}`'
+        : '""');
+
+    const routes = currentModel.routes ?? ["post", "get", "search", "put", "delete"];
+    for (const action of ["post", "get", "search", "put", "delete"]) {
+        const section = new RegExp(`\\{\\{#${action}\\}\\}([\\s\\S]*?)\\{\\{/${action}\\}\\}`, "g");
+        testFile = testFile.replace(section, routes.includes(action) ? "$1" : "");
+    }
 
     // Create the model file
     workflow.emit('createTestFile', models, currentModel, testFile, cb);
@@ -141,7 +150,7 @@ function modelFields(model) {
  *  @returns {String} the full path of the test file.
  */
 function getTestFileName(modelName){
-    return appSettings.directory + "/test/" + modelName.toLowerCase() + '.js' ;
+    return appSettings.directory + "/test/" + modelName.toLowerCase() + '.test.js' ;
 }
 
 export function generate(settings, cb) {

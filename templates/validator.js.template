@@ -1,5 +1,5 @@
 // Load Module Dependencies
-import { body, param } from "express-validator";
+import { {{validatorImports}} } from "express-validator";
 
 /**
  * POST Validation.
