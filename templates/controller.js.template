@@ -1,265 +1,73 @@
-// Load Module Dependencies
-import events from 'events';
-import { validationResult } from 'express-validator';
+import {{modelName}} from "../models/{{modelNameToLower}}.js";
+import { HttpError } from "../utils/http-error.js";
+import { getQueryOptions } from "../utils/query-options.js";
 
-// Load Search Options library file
-import * as searchOptions from '../lib/search_options.js';
-
-import * as {{modelName}}Dal from '../dal/{{modelNameToLower}}.js';
-
-// Default fields to return on search if not provided
 const defaultFields = {{modelDefaultFieldList}};
+const population = {{relatedModels}};
 
-/*
- * Create {{modelName}}
- *
- *  1. Validate Data
- *  2. Create {{modelName}}
- *  3. Respond
- */
-export function create{{modelName}}(req, res, next) {
-    var workflow = new events.EventEmitter();
+export async function create{{modelName}}(req, res) {
+  const {{modelNameToLower}} = await {{modelName}}.create(req.body);
+  res.status(201).json({{modelNameToLower}});
+}
 
-    workflow.on('validateData', function validateData() {
-        // Validate {{modelName}} data
-        var errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(422).json({ errors: errors.array() });
-        }
+export async function get{{modelName}}(req, res) {
+  const {{modelNameToLower}} = await {{modelName}}
+    .findById(req.params.{{modelNameToLower}}Id)
+    .populate(population)
+    .lean();
 
-        // On Success emit create {{modelName}} event
-        workflow.emit('create{{modelName}}');
-    });
+  if (!{{modelNameToLower}}) {
+    throw new HttpError(404, "{{modelName}} not found");
+  }
 
-    workflow.on('create{{modelName}}', function create{{modelName}}() {
-        {{modelName}}Dal.create(req.body, function callback(err, {{modelNameToLower}}) {
-            if (err) {
-                return next(err);
-            }
+  res.json({{modelNameToLower}});
+}
 
-            // On Success emit create profile event
-            workflow.emit('respond', {{modelNameToLower}});
-        });
-    });
+export async function search{{modelNamePlural}}(req, res) {
+  const options = getQueryOptions(req.query, defaultFields);
+  const [result, total, totalFiltered] = await Promise.all([
+    {{modelName}}
+      .find(options.filter, options.fields)
+      .populate(population)
+      .sort(options.sort)
+      .limit(options.limit)
+      .skip(options.limit * (options.page - 1))
+      .lean(),
+    {{modelName}}.countDocuments(),
+    {{modelName}}.countDocuments(options.filter)
+  ]);
 
-    workflow.on('respond', function respond({{modelNameToLower}}) {
-        res.status(201);
-        res.json({{modelNameToLower}});
-    });
-
-    workflow.emit('validateData');
-};
-
-/*
- * Get {{modelName}}
- *
- *  1. Validate {{modelName}} Id
- *  2. Fetch {{modelName}} form database
- *  3. Respond
- */
-export function get{{modelName}}(req, res, next) {
-    var workflow = new events.EventEmitter();
-
-    workflow.on('validate{{modelName}}Id', function validate{{modelName}}Id() {
-        // Validate {{modelName}} ID
-        var errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(422).json({ errors: errors.array() });
-        }
-
-        // On Success emit fetch {{modelName}} event
-        workflow.emit('fetch{{modelName}}', req.params.{{modelNameToLower}}Id);
-    });
-
-    workflow.on('fetch{{modelName}}', function fetch{{modelName}}({{modelNameToLower}}Id) {
-        {{modelName}}Dal.get({ _id: {{modelNameToLower}}Id }, function (err, {{modelNameToLower}}) {
-            if (err) {
-                // handle error
-                return next(err);
-            }
-
-            workflow.emit('respond', {{modelNameToLower}});
-        });
-    });
-
-    workflow.on('respond', function respond({{modelNameToLower}}) {
-        res.status(200);
-        res.json({{modelNameToLower}});
-    });
-
-    workflow.emit('validate{{modelName}}Id');
-};
-
-/*
- * Search {{modelNamePlural}}
- *
- *  1. Validate Search Query
- *  2. Fetch {{modelNamePlural}} form database
- *  3. Respond
- */
-export function search{{modelNamePlural}}(req, res, next) {
-    var workflow = new events.EventEmitter();
-
-    // Set default search parameter options
-    req.query.filter = searchOptions.getFilter(req);
-    req.query.fields = searchOptions.getFields(req, defaultFields);
-    req.query.page = searchOptions.getPage(req);
-    req.query.limit = searchOptions.getLimit(req);
-    req.query.sort = searchOptions.getSort(req);
-
-    workflow.on('search{{modelNamePlural}}', function search{{modelNamePlural}}() {
-        var opts = {
-            filter: req.query.filter,
-            fields: req.query.fields,
-            sort: req.query.sort,
-            limit: req.query.limit,
-            page: req.query.page
-        };
-
-        {{modelName}}Dal.search(opts, function (err, {{modelNamePluralToLower}}) {
-            if (err) {
-                // handle error
-                return next(err);
-            }
-
-            workflow.emit("getTotalCount", opts, {{modelNamePluralToLower}});
-        });
+  res.json({
+    options: { ...options, total, totalFiltered },
+    result
   });
+}
 
-  workflow.on("getTotalCount", function (opts, {{modelNamePluralToLower}}) {
-    {{modelName}}Dal.count({}, function(err, total) {
-      if (err) {
-        // handle error
-        return next(err);
-      }
+export async function update{{modelName}}(req, res) {
+  const {{modelNameToLower}} = await {{modelName}}
+    .findByIdAndUpdate(
+      req.params.{{modelNameToLower}}Id,
+      { $set: req.body },
+      { new: true, runValidators: true }
+    )
+    .populate(population)
+    .lean();
 
-      opts.total = total;
+  if (!{{modelNameToLower}}) {
+    throw new HttpError(404, "{{modelName}} not found");
+  }
 
-      // Check if filter is an empty object, i.e. total filtered count is total count
-      if (
-        Object.keys(opts.filter).length === 0 &&
-        opts.filter.constructor === Object
-      ) {
-        opts.totalFiltered = total;
-        workflow.emit("respond", opts, {{modelNamePluralToLower}});
-      } else {
-        workflow.emit("getTotalFilteredCount", opts, {{modelNamePluralToLower}});
-      }
-    });
-  });
+  res.json({{modelNameToLower}});
+}
 
-    workflow.on("getTotalFilteredCount", function (opts, users) {
-        {{modelName}}Dal.count(opts.filter, function(err, totalFiltered) {
-            if (err) {
-                // handle error
-                return next(err);
-            }
+export async function remove{{modelName}}(req, res) {
+  const {{modelNameToLower}} = await {{modelName}}
+    .findByIdAndDelete(req.params.{{modelNameToLower}}Id)
+    .lean();
 
-            opts.totalFiltered = totalFiltered;
+  if (!{{modelNameToLower}}) {
+    throw new HttpError(404, "{{modelName}} not found");
+  }
 
-            workflow.emit("respond", opts, {{modelNamePluralToLower}});
-        });
-    });
-
-
-    workflow.on('respond', function respond(opts, {{modelNamePluralToLower}}) {
-        res.status(200);
-        res.json({
-            "options": opts,
-            "result":  {{modelNamePluralToLower}}
-        });
-    });
-
-    workflow.emit('search{{modelNamePlural}}');
-};
-
-/*
- * Update {{modelName}}
- *
- *  1. Validate {{modelName}} Data
- *  2. Update {{modelName}} in database
- *  3. Respond
- */
-export function update{{modelName}}(req, res, next) {
-    var workflow = new events.EventEmitter();
-
-    workflow.on('validate{{modelName}}Data', function validate{{modelName}}Data() {
-        // Validate {{modelName}} ID and update document
-        var errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(422).json({ errors: errors.array() });
-        }
-
-        // On Success emit update {{modelName}} event
-        workflow.emit('update{{modelName}}');
-    });
-
-    workflow.on('update{{modelName}}', function update{{modelName}}() {
-
-        {{modelName}}Dal.update({ _id: req.params.{{modelNameToLower}}Id }, req.body, function (err, {{modelNameToLower}}) {
-            if (err) {
-                // handle error
-                return next(err);
-            }
-
-            workflow.emit('respond', {{modelNameToLower}});
-        });
-    });
-
-    workflow.on('respond', function respond({{modelNameToLower}}) {
-        // TODO: Remove private fields
-        res.status(200);
-        res.json({{modelNameToLower}});
-    });
-
-    workflow.emit('validate{{modelName}}Data');
-};
-
-/*
- * Remove {{modelName}}
- *
- *  1. Validate {{modelName}} Id
- *  2. Remove {{modelName}} form database
- *  3. Respond
- */
-export function remove{{modelName}}(req, res, next) {
-    var workflow = new events.EventEmitter();
-
-    workflow.on('validate{{modelName}}Id', function validate{{modelName}}Id() {
-        // Validate {{modelName}} id
-        var errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(422).json({ errors: errors.array() });
-        }
-
-        // On Success emit remove {{modelName}} event
-        workflow.emit('remove{{modelName}}');
-    });
-
-    workflow.on('remove{{modelName}}', function remove{{modelName}}() {
-        {{modelName}}Dal.remove({ _id: req.params.{{modelNameToLower}}Id }, function (err, {{modelNameToLower}}) {
-            if (err) {
-                // handle error
-                return next(err);
-            }
-
-            workflow.emit('respond', {{modelNameToLower}});
-        });
-    });
-
-    workflow.on('respond', function respond({{modelNameToLower}}) {
-        // TODO: Remove private fields
-        res.status(200);
-        res.json({{modelNameToLower}});
-    });
-
-    workflow.emit('validate{{modelName}}Id');
-};
-
-
-// no operation(noop) function
-export function noop(req, res, next) {
-    res.json({
-        message: "To Implemented"
-    });
-};
+  res.json({{modelNameToLower}});
+}

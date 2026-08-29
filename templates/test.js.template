@@ -1,127 +1,73 @@
-// Load Module Dependencies
-import request from 'supertest';
-import { expect } from 'chai';
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import jwt from "jsonwebtoken";
+import request from "supertest";
 
-// Load application
-import app from '../app.js';
+import app from "../src/app.js";
+import { JWT_KEY } from "../src/config/index.js";
+import {{modelName}} from "../src/models/{{modelNameToLower}}.js";
 
-describe('{{modelName}} Endpoint', function () {
-    var {{modelNameToLower}};
-    var sampleDocument = {
+const authorization = {{authToken}};
+const sampleDocument = {
 {{modelFields}}
-    };
+};
 
-    describe('#{{modelName}} POST /{{modelNamePluralToLower}}', function () {
+describe("{{modelName}} endpoints", () => {
+{{#post}}
+  it("creates a {{modelNameToLower}}", async () => {
+    const response = await request(app)
+      .post("/{{modelNamePluralToLower}}")
+      .set("Authorization", authorization)
+      .send(sampleDocument)
+      .expect(201);
 
-        it('should create a new {{modelNameToLower}}', function (done) {
+    assert.ok(response.body._id);
+  });
+{{/post}}
+{{#get}}
+  it("gets a {{modelNameToLower}} by ID", async () => {
+    const existing = await {{modelName}}.create(sampleDocument);
+    const response = await request(app)
+      .get(`/{{modelNamePluralToLower}}/${existing.id}`)
+      .set("Authorization", authorization)
+      .expect(200);
 
-            request(app)
-                .post('/{{modelNamePluralToLower}}')
-                .set('Content-Type', 'application/json; charset=utf-8')
-                .send(sampleDocument)
-                .expect('Content-Type', 'application/json; charset=utf-8')
-                .expect(201)
-                .end(function (err, res) {
-                    if (err) {
-                        return done(err);
-                    }
+    assert.equal(response.body._id, existing.id);
+  });
+{{/get}}
+{{#search}}
+  it("searches {{modelNamePluralToLower}}", async () => {
+    await {{modelName}}.create(sampleDocument);
+    const response = await request(app)
+      .get("/{{modelNamePluralToLower}}/search")
+      .set("Authorization", authorization)
+      .expect(200);
 
-                    // Set {{modelName}} for later use
-                    {{modelNameToLower}} = res.body;
+    assert.ok(Array.isArray(response.body.result));
+    assert.equal(typeof response.body.options.total, "number");
+  });
+{{/search}}
+{{#put}}
+  it("updates a {{modelNameToLower}}", async () => {
+    const existing = await {{modelName}}.create(sampleDocument);
+    const response = await request(app)
+      .put(`/{{modelNamePluralToLower}}/${existing.id}`)
+      .set("Authorization", authorization)
+      .send(sampleDocument)
+      .expect(200);
 
-                    // Assertion tests on response body
-                    expect(res.body._id).to.not.equal('string');
+    assert.equal(response.body._id, existing.id);
+  });
+{{/put}}
+{{#delete}}
+  it("deletes a {{modelNameToLower}}", async () => {
+    const existing = await {{modelName}}.create(sampleDocument);
+    const response = await request(app)
+      .delete(`/{{modelNamePluralToLower}}/${existing.id}`)
+      .set("Authorization", authorization)
+      .expect(200);
 
-                    done();
-                });
-        });
-    });
-
-    describe('#{{modelName}} GET /{{modelNamePluralToLower}}/:{{modelNameToLower}}Id', function () {
-        it('should get a {{modelNameToLower}}', function (done) {
-
-            request(app)
-                .get('/{{modelNamePluralToLower}}/' + {{modelNameToLower}}._id)
-                .set('Content-Type', 'application/json; charset=utf-8')
-                .expect('Content-Type', 'application/json; charset=utf-8')
-                .expect(200)
-                .end(function (err, res) {
-                    if (err) {
-                        return done(err);
-                    }
-
-                    // Assertion tests on response body
-                    expect(res.body._id).to.equal({{modelNameToLower}}._id.toString());
-
-                    done();
-                });
-        });
-    });
-
-    describe('#{{modelName}} GET /{{modelNamePluralToLower}}/search', function () {
-        it('should get a collection of {{modelNamePluralToLower}}', function (done) {
-
-            request(app)
-                .get('/{{modelNamePluralToLower}}/search')
-                .set('Content-Type', 'application/json; charset=utf-8')
-                .expect('Content-Type', 'application/json; charset=utf-8')
-                .expect(200)
-                .end(function (err, res) {
-                    if (err) {
-                        return done(err);
-                    }
-
-                    // Assertion tests on response body
-                    expect(res.body.options).to.be.an('object');
-                    expect(res.body.result).to.be.an('array');
-
-                    done();
-                });
-        });
-    });
-
-    describe('#{{modelName}} PUT /{{modelNamePluralToLower}}/:{{modelNameToLower}}Id', function () {
-        it('should update an existing {{modelNameToLower}}', function (done) {
-
-            request(app)
-                .put('/{{modelNamePluralToLower}}/' + {{modelNameToLower}}._id)
-                .set('Content-Type', 'application/json; charset=utf-8')
-                .send(sampleDocument)
-                .expect('Content-Type', 'application/json; charset=utf-8')
-                .expect(200)
-                .end(function (err, res) {
-                    if (err) {
-                        return done(err);
-                    }
-
-                    // Assertion tests on response body
-                    expect({{modelNameToLower}}.updatedAt).to.not.equal(res.body.updatedAt);
-
-                    done();
-                });
-        });
-    });
-
-    describe('#{{modelName}} DELETE /{{modelNamePluralToLower}}/:{{modelNameToLower}}Id', function () {
-        it('should delete an existing {{modelNameToLower}}', function (done) {
-
-            request(app)
-                .delete('/{{modelNamePluralToLower}}/' + {{modelNameToLower}}._id)
-                .set('Content-Type', 'application/json; charset=utf-8')
-                .expect('Content-Type', 'application/json; charset=utf-8')
-                .expect(200)
-                .end(function (err, res) {
-                    if (err) {
-                        return done(err);
-                    }
-
-                    // Assertion tests on response body
-                    expect({{modelNameToLower}}._id).to.equal(res.body._id);
-
-                    done();
-                });
-        });
-    });
-
+    assert.equal(response.body._id, existing.id);
+  });
+{{/delete}}
 });
-

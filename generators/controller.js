@@ -39,6 +39,7 @@ workflow.on('replaceControllerTokens', function replaceControllerTokens(models, 
     controllerFile = controllerFile.replace(/\{\{modelNamePlural\}\}/g, pluralize(currentModel.name));
     controllerFile = controllerFile.replace(/\{\{modelNamePluralToLower\}\}/g, pluralize(currentModel.name.toLowerCase()));
     controllerFile = controllerFile.replace(/\{\{modelDefaultFieldList\}\}/g, defaultFieldList(currentModel));
+    controllerFile = controllerFile.replace(/\{\{relatedModels\}\}/g, relatedModels(currentModel));
 
     workflow.emit('createControllerFile', models, currentModel, controllerFile, cb);
 });
@@ -54,7 +55,7 @@ workflow.on('createControllerFile', function createControllerFile(models, curren
 });
 
 function getControllerFileName(modelName) {
-    return appSettings.directory + '/controllers/' + modelName.toLowerCase() + '.js';
+    return appSettings.directory + '/src/controllers/' + modelName.toLowerCase() + '.js';
 }
 
 function defaultFieldList(model) {
@@ -65,6 +66,21 @@ function defaultFieldList(model) {
     });
 
     return "[" + tokenReplacement.join(", ") + "]";
+}
+
+function relatedModels(model) {
+    if (!model.relations?.length) {
+        return "[]";
+    }
+
+    const entries = model.relations.map((relation) => {
+        const path = relation.referenceType === "multiple"
+            ? pluralize(relation.name.toLowerCase())
+            : relation.name.toLowerCase();
+        return `{ path: "${path}" }`;
+    });
+
+    return `[${entries.join(", ")}]`;
 }
 
 export const generate = function generateControllers(settings, cb) {

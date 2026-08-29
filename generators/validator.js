@@ -76,6 +76,13 @@ workflow.on('replaceValidatorTokens', function replaceValidatorTokens(models, cu
 
     // Model Name in lower case
     validatorFile = validatorFile.replace(/\{\{modelNameToLower\}\}/g, currentModel.name.toLowerCase());
+    const hasBodyValidation = currentModel.attributes.some(
+        (attribute) => attribute.validation?.length
+    );
+    validatorFile = validatorFile.replace(
+        /\{\{validatorImports\}\}/g,
+        hasBodyValidation ? "body, param" : "param"
+    );
 
     // Model create action field validation
     validatorFile = validatorFile.replace(/\{\{postFieldValidation\}\}/g, postFieldValidation(currentModel));
@@ -119,7 +126,7 @@ workflow.on('createValidatorFile', function createValidatorFile(models, currentM
  *  @returns {String} the full path of the validator file.
  */
 function getValidatorFileName(modelName){
-    return `${appSettings.directory}/routes/validators/${modelName.toLowerCase()}.js` ;
+    return `${appSettings.directory}/src/routes/validators/${modelName.toLowerCase()}.js` ;
 }
 
 /*
@@ -164,8 +171,7 @@ function putFieldValidation(model) {
         let validatorList = attribute.validation.filter(o => !["isEmpty", "notEmpty"].includes(o.type));
 
         validatorList.forEach(function(option) {
-          if(option.type.includes)
-            tokenReplacement += `
+          tokenReplacement += `
                 body("${attribute.name}", "${option.message}")
                   .optional()
                   .${option.type}(),`;

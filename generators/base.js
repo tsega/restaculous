@@ -71,7 +71,7 @@ workflow.on('replaceConfigTokens', function replaceConfigTokens(configFile, cb) 
 
     configFile = configFile.replace(/\{\{configSettings\}\}/g, tokenReplacement);
 
-    // Create the dal file
+    // Create the environment file
     workflow.emit('createConfigFile', configFile, cb);
 });
 
@@ -144,7 +144,7 @@ workflow.on('replaceRouterTokens', function replaceRouterTokens(routerFile, cb) 
     routerFile = routerFile.replace(/\{\{requireUserRouter\}\}/g,  appSettings.authentication ? userRouterRequireToken : "");
     routerFile = routerFile.replace(/\{\{userRouter\}\}/g,  appSettings.authentication ? userRouterToken : "");
 
-    // Create the dal file
+    // Create the router file
     workflow.emit('createRouterFile',routerFile, cb);
 });
 
@@ -157,7 +157,7 @@ workflow.on('replaceRouterTokens', function replaceRouterTokens(routerFile, cb) 
  *  @param {workflowCallback} cb - The callback to handle end of the dals generation process.
  */
 workflow.on('createRouterFile', function createRouterFile(routerFile, cb) {
-    fs.writeFile(appSettings.directory + '/routes/index.js', routerFile, opts, function rf(err) {
+    fs.writeFile(appSettings.directory + '/src/routes/index.js', routerFile, opts, function rf(err) {
         if (err) {
             // Error handling
             return cb(err);
@@ -201,10 +201,11 @@ workflow.on('replacePackageTokens', function replacePackageTokens(packageFile, c
 
     packageFile = packageFile.replace(/\{\{appName\}\}/g, appName);
     packageFile = packageFile.replace(/\{\{appDescription\}\}/g, appDescription);
+    packageFile = packageFile.replace(/\{\{author\}\}/g, appSettings.author);
     packageFile = packageFile.replace(/\{\{repositoryType\}\}/g, appSettings.repository.type);
     packageFile = packageFile.replace(/\{\{repositoryAddress\}\}/g, appSettings.repository.url);
 
-    // Create the dal file
+    // Create the package file
     workflow.emit('createPackageFile',packageFile, cb);
 });
 

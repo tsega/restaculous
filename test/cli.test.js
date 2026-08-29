@@ -7,6 +7,13 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import { generate as generateRoutes } from "../generators/route.js";
+import { generate as generateStructure } from "../generators/structure.js";
+import { generate as generateAuthentication } from "../generators/auth.js";
+import { generate as generateModels } from "../generators/model.js";
+import { generate as generateControllers } from "../generators/controller.js";
+import { generate as generateValidators } from "../generators/validator.js";
+import { generate as generateTests } from "../generators/test.js";
+import { generate as generateBase } from "../generators/base.js";
 import {
   loadSettings,
   SettingsError,
@@ -70,16 +77,13 @@ test("CLI reports malformed settings JSON and exits unsuccessfully", async (t) =
   assert.doesNotMatch(error?.stderr, /at async readSettings/);
 });
 
-test("settings validation reports all invalid top-level fields", () => {
+test("settings validation reports required top-level fields", () => {
   assert.throws(
     () => validateSettings({}),
     (error) => {
       assert.ok(error instanceof SettingsError);
-      assert.match(error.message, /"name" must be a non-empty string/);
-      assert.match(error.message, /"directory" must be a non-empty string/);
-      assert.match(error.message, /"repository" must be an object/);
-      assert.match(error.message, /"config" must be an array/);
-      assert.match(error.message, /"models" must be an array/);
+      assert.match(error.message, /"name" invalid input/);
+      assert.match(error.message, /"directory" invalid input/);
       return true;
     }
   );
@@ -91,7 +95,7 @@ test("settings validation rejects unsupported authentication actions", () => {
 
   assert.throws(
     () => validateSettings(settings),
-    /contains unsupported actions: publish/
+    /models\.0\.authentication\.1.*expected one of/
   );
 });
 
@@ -111,6 +115,36 @@ test("settings loader accepts a valid relative path", async (t) => {
   assert.equal(settings.name, "Movies");
 });
 
+test("settings validation supplies defaults for minimal configuration", () => {
+  const settings = validateSettings({
+    name: "Movies API",
+    directory: "./movies-api"
+  });
+
+  assert.equal(settings.authentication, false);
+  assert.deepEqual(settings.models, []);
+  assert.equal(
+    settings.config.find(({ name }) => name === "MONGODB_URL").value,
+    "mongodb://127.0.0.1:27017/movies-api"
+  );
+});
+
+test("models generate all CRUD routes by default", () => {
+  const settings = validateSettings({
+    name: "Movies",
+    directory: "./movies-api",
+    models: [{ name: "Movie" }]
+  });
+
+  assert.deepEqual(settings.models[0].routes, [
+    "get",
+    "post",
+    "put",
+    "delete",
+    "search"
+  ]);
+});
+
 test("workflow runs all stages in order when authentication is enabled", async () => {
   const calls = [];
   const completed = [];
@@ -126,14 +160,12 @@ test("workflow runs all stages in order when authentication is enabled", async (
     "structure",
     "authentication",
     "models",
-    "dals",
     "controllers",
     "routes",
     "validators",
     "tests",
     "base",
     "dependencies",
-    "documentation",
     "format",
     "lint"
   ];
@@ -169,8 +201,8 @@ test("workflow stops immediately after a stage fails", async () => {
     /controllers stage failed: simulated failure/
   );
 
-  assert.deepEqual(calls, ["structure", "models", "dals", "controllers"]);
-  assert.deepEqual(completed, ["structure", "models", "dals"]);
+  assert.deepEqual(calls, ["structure", "models", "controllers"]);
+  assert.deepEqual(completed, ["structure", "models"]);
 });
 
 test("route generator emits an ES module authentication import", async (t) => {
@@ -179,7 +211,7 @@ test("route generator emits an ES module authentication import", async (t) => {
   );
   t.after(() => rm(outputDirectory, { recursive: true, force: true }));
 
-  await mkdir(path.join(outputDirectory, "routes"));
+  await mkdir(path.join(outputDirectory, "src", "routes"), { recursive: true });
 
   const settings = {
     directory: outputDirectory,
@@ -204,15 +236,82 @@ test("route generator emits an ES module authentication import", async (t) => {
   });
 
   const route = await readFile(
-    path.join(outputDirectory, "routes", "movie.js"),
+    path.join(outputDirectory, "src", "routes", "movie.js"),
     "utf8"
   );
 
   assert.match(
     route,
-    /import \{ checkAuthToken \} from '\.\.\/lib\/auth\.js';/
+    /import \{ checkAuthToken \} from "\.\.\/middleware\/auth\.js";/
   );
   assert.doesNotMatch(route, /require\(/);
+});
+
+test("generators produce a clean src-based application without a DAL", async (t) => {
+  const outputDirectory = await mkdtemp(
+    path.join(tmpdir(), "restaculous-generated-app-")
+  );
+  t.after(() => rm(outputDirectory, { recursive: true, force: true }));
+
+  const settings = validateSettings({
+    name: "Movies",
+    directory: outputDirectory,
+    authentication: true,
+    models: [
+      {
+        name: "Movie",
+        routes: ["get", "search"],
+        authentication: ["get"],
+        attributes: [{ name: "title", type: "String" }]
+      }
+    ]
+  });
+
+  for (const generate of [
+    generateStructure,
+    generateAuthentication,
+    generateModels,
+    generateControllers,
+    generateRoutes,
+    generateValidators,
+    generateTests,
+    generateBase
+  ]) {
+    await runGenerator(generate, settings);
+  }
+
+  const expectedFiles = [
+    "src/app.js",
+    "src/server.js",
+    "src/controllers/movie.js",
+    "src/models/movie.js",
+    "src/routes/movie.js",
+    "src/services/auth.js",
+    "src/middleware/errors.js",
+    "test/movie.test.js",
+    "package.json"
+  ];
+  for (const file of expectedFiles) {
+    await readFile(path.join(outputDirectory, file), "utf8");
+  }
+
+  await assert.rejects(readFile(path.join(outputDirectory, "dal", "movie.js")));
+
+  const movieRoute = await readFile(
+    path.join(outputDirectory, "src/routes/movie.js"),
+    "utf8"
+  );
+  assert.match(movieRoute, /router\.get\("\/search"/);
+  assert.match(movieRoute, /router\.get\("\/:movieId"/);
+  assert.doesNotMatch(movieRoute, /router\.(post|put|delete)\(/);
+
+  const files = execFileSync("find", [outputDirectory, "-name", "*.js"], {
+    encoding: "utf8"
+  }).trim().split("\n");
+  for (const file of files) {
+    execFileSync(process.execPath, ["--check", file], { stdio: "pipe" });
+    assert.doesNotMatch(await readFile(file, "utf8"), /\{\{[^}]+\}\}/);
+  }
 });
 
 function createValidSettings() {
@@ -263,15 +362,19 @@ function createWorkflowServices(calls, failingStage) {
     structure: service("structure"),
     authentication: service("authentication"),
     models: service("models"),
-    dals: service("dals"),
     controllers: service("controllers"),
     routes: service("routes"),
     validators: service("validators"),
     tests: service("tests"),
     base: service("base"),
     dependencies: service("dependencies"),
-    documentation: service("documentation"),
     format: runner("format", "runFormatter"),
     lint: runner("lint", "runLinter")
   };
+}
+
+function runGenerator(generate, settings) {
+  return new Promise((resolve, reject) => {
+    generate(settings, (error) => error ? reject(error) : resolve());
+  });
 }

@@ -5,14 +5,12 @@ export async function runWorkflow(settings, services, onStageComplete = () => {}
       ? [["authentication", services.authentication.generate]]
       : []),
     ["models", services.models.generate],
-    ["dals", services.dals.generate],
     ["controllers", services.controllers.generate],
     ["routes", services.routes.generate],
     ["validators", services.validators.generate],
     ["tests", services.tests.generate],
     ["base", services.base.generate],
     ["dependencies", services.dependencies.generate],
-    ["documentation", services.documentation.generate],
     ["format", services.format.runFormatter],
     ["lint", services.lint.runLinter]
   ];
