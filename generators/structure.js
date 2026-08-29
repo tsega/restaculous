@@ -1,13 +1,18 @@
 /*
  *  Load module dependencies
  */
-var events = require('events');
-var fs = require('fs-extra');
+import events from 'events';
+import fs from 'fs-extra';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /*
  *  Set file options
  */
-var opts = {
+const opts = {
     encoding: 'utf8'
 };
 
@@ -16,7 +21,7 @@ var opts = {
  *
  *  1. Copy structure folder to settings specified location
  */
-var workflow = new events.EventEmitter();
+const workflow = new events.EventEmitter();
 
 /*
  *  copyStructure
@@ -30,15 +35,13 @@ workflow.on('copyStructure', function copyStructure(settings, cb) {
     fs.copy(__dirname + '/../structure', settings.directory, function done(err) {
         if (err) {
             // Error handling
-            cb(err);
+            return cb(err);
         }
 
         cb(null);
     });
 });
 
-exports.generate = function generateStructure(settings, cb) {
+export function generate(settings, cb) {
     workflow.emit('copyStructure', settings, cb);
 };
-
-

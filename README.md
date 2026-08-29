@@ -2,6 +2,30 @@
 
 An opinionated ExpressJs based REST API generator.
 
+## CLI development and tests
+
+CLI development requires Node.js 24 or newer. The repository includes an
+`.nvmrc` file pinned to the Node.js 24 LTS release used by the project. With
+[nvm](https://github.com/nvm-sh/nvm) installed, select it with:
+
+```sh
+nvm install
+nvm use
+```
+
+The generator CLI uses Node.js's built-in test runner, so its tests do not
+require a separate test framework. Install the project dependencies and run:
+
+```sh
+npm test
+```
+
+The CLI test suite is kept in `test/` and checks command-line behavior,
+settings-file loading and validation, workflow order and failure handling, and
+focused generator output. These tests cover the generator itself; they are
+separate from the tests included in applications produced from the `structure/`
+and `templates/` assets.
+
 ## Installation
 To use the generator simply install it globally using NPM:
 

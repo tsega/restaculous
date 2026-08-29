@@ -1,12 +1,12 @@
 // Load module dependencies
-var mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 // Define {{modelName}} attributes
-var {{modelName}}Schema = mongoose.Schema({
+const {{modelName}}Schema = mongoose.Schema({
 {{modelSchema}}
 }, {
   timestamps: true
 });
 
 // Export {{modelName}} model
-module.exports = mongoose.model('{{modelName}}', {{modelName}}Schema);
+export default mongoose.model('{{modelName}}', {{modelName}}Schema);

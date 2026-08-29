@@ -2,6 +2,7 @@
   "name": "{{appName}}-api",
   "version": "0.0.1",
   "description": "{{appDescription}}",
+  "type": "module",
   "repository": {
     "type": "{{repositoryType}}",
     "url": "{{repositoryAddress}}"
@@ -11,39 +12,37 @@
     "test": "test"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha",
-    "dev": "./node_modules/.bin/nodemon app.js",
+    "test": "mocha",
+    "dev": "nodemon app.js",
     "start": "node app.js",
-    "build-docs": "./node_modules/.bin/apidoc -i ./routes -o ./docs",
-    "prettier": "./node_modules/.bin/prettier --write *.js **/*.js",
-    "eslint": "./node_modules/.bin/eslint --fix  './**/*.js'"
+    "build-docs": "apidoc -i ./routes -o ./docs",
+    "prettier": "prettier --write *.js **/*.js",
+    "eslint": "eslint --fix  './**/*.js'"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "bcrypt": "^3.0.7",
-    "dotenv": "^8.2.0",
-    "express": "^4.14.1",
-    "express-validator": "^6.3.0",
-    "jsonwebtoken":"^8.5.1",
-    "mongoose": "^5.2.0"
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-validator": "^7.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.3.2"
   },
   "devDependencies": {
-    "apidoc": "^0.19.0",
-    "chai": "^4.2.0",
-    "chi": "0.0.10",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.7.0",
-    "eslint-config-standard": "^14.1.0",
-    "eslint-plugin-import": "^2.19.1",
-    "eslint-plugin-node": "^10.0.0",
-    "eslint-plugin-prettier": "^3.1.2",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
-    "mocha": "^6.2.2",
-    "nodemon": "^2.0.2",
-    "prettier": "^1.19.1",
-    "supertest": "^4.0.2"
+    "apidoc": "^1.2.0",
+    "chai": "^4.4.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-promise": "^6.1.1",
+    "mocha": "^10.4.0",
+    "nodemon": "^3.1.0",
+    "prettier": "^3.2.5",
+    "supertest": "^6.3.4"
   },
   "apidoc": {
     "name":"{{appName}}-api",

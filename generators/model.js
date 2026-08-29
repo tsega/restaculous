@@ -1,29 +1,19 @@
-/*
- *  Load module dependencies
- */
-var events = require('events');
-var fs = require('fs-extra');
-var clone = require('clone');
-var pluralize = require('pluralize');
+import events from 'events';
+import fs from 'fs-extra';
+import clone from 'clone';
+import pluralize from 'pluralize';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-/*
- *  Set file options
- */
-var opts = {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const opts = {
     encoding: 'utf8'
 };
 
-/*
- *  Model Generator Flow
- *
- *  1. Read model template
- *  2. Replace tokens in model template
- *  3. Create model file
- *  4. Iterate through steps 1-5 until all model files are generated
- */
-var workflow = new events.EventEmitter();
-var appSettings = {};
-
+const workflow = new events.EventEmitter();
+let appSettings = {};
 
 /*
  *  readModelTemplate
@@ -34,16 +24,16 @@ var appSettings = {};
  *  @param {workflowCallback} cb - The callback to handle end of the models generation process.
  */
 workflow.on('readModelTemplate', function readModelTemplate(models, cb) {
-    var allModels = clone(models);
+    const allModels = clone(models);
 
     // Make sure that all models have been generated
     if (allModels.length) {
-        var currentModel = allModels.pop();
+        const currentModel = allModels.pop();
 
         fs.readFile(__dirname + '/../templates/model.js.template', opts, function rf(err, modelFile) {
             if (err) {
                 // Error handling
-                cb(err);
+                return cb(err);
             }
 
             // Replace the file tokens
@@ -66,8 +56,8 @@ workflow.on('readModelTemplate', function readModelTemplate(models, cb) {
  *  @param {workflowCallback} cb - The callback to handle end of the models generation process.
  */
 workflow.on('replaceModelTokens', function replaceModelTokens(models, currentModel, modelFile, cb) {
-    var relatedModels = [];
-    var schemaEntries = [];
+    const relatedModels = [];
+    const schemaEntries = [];
 
     // Related models
     if (currentModel.relations && currentModel.relations.length) {
@@ -80,7 +70,7 @@ workflow.on('replaceModelTokens', function replaceModelTokens(models, currentMod
     modelFile = modelFile.replace(/\{\{modelName\}\}/g, currentModel.name);
 
     // Model Schema
-    var modelSchema = schemaEntries;
+    const modelSchema = schemaEntries;
 
     if (currentModel.attributes.length) {
         currentModel.attributes.forEach(function (attribute) {
@@ -109,7 +99,7 @@ workflow.on('createModelFile', function createModelFile(models, currentModel, mo
     fs.writeFile(getModelFileName(currentModel.name), modelFile, opts, function rf(err, data) {
         if (err) {
             // Error handling
-            cb(err);
+            return cb(err);
         }
 
         // This is called to iterate through all models
@@ -146,9 +136,7 @@ function getModelFileName(modelName){
     return appSettings.directory + "/models/" + modelName.toLowerCase() + '.js' ;
 }
 
-exports.generate = function generateModels(settings, cb) {
+export const generate = function generateModels(settings, cb) {
     appSettings = settings;
     workflow.emit('readModelTemplate', appSettings.models, cb);
 };
-
-

@@ -1,12 +1,12 @@
 // Load Module Dependencies
-var express = require('express');
-var { getValidator, postValidator, putValidator, deleteValidator } = require("./validators/{{modelNameToLower}}");
+import express from 'express';
+import { getValidator, postValidator, putValidator, deleteValidator } from "./validators/{{modelNameToLower}}.js";
 
-var {{modelName}} = require('../controllers/{{modelNameToLower}}');
+import * as {{modelName}} from '../controllers/{{modelNameToLower}}.js';
 {{checkAuthImportToken}}
 
 // Create a router
-var router = express.Router();
+const router = express.Router();
 
 /**
  * @api {post} /{{modelNamePluralToLower}}/  Create {{modelNameToLower}}
@@ -90,4 +90,4 @@ router.put('/:{{modelNameToLower}}Id', {{putAuth}}putValidator, {{modelName}}.up
 router.delete('/:{{modelNameToLower}}Id', {{deleteAuth}}deleteValidator, {{modelName}}.remove{{modelName}});
 
 // Export the router
-module.exports = router;
+export default router;

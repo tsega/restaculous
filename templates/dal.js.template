@@ -1,6 +1,6 @@
 // Load Module Dependencies.
-var {{modelName}} = require('../models/{{modelNameToLower}}');
-var population = [
+import {{modelName}} from '../models/{{modelNameToLower}}.js';
+const population = [
 {{relatedModels}}
 ];
 
@@ -13,16 +13,12 @@ var population = [
  * @param {Object}   {{modelNameToLower}}Data  Data for the {{modelName}} to create
  * @param {Function} cb     Callback for once saving is complete
  */
-exports.create = function create({{modelNameToLower}}Data, cb) {
+export function create({{modelNameToLower}}Data, cb) {
     console.log('creating a new {{modelName}}');
     // Create {{modelName}}
-    {{modelName}}.create({{modelNameToLower}}Data, function create{{modelName}}(err, {{modelNameToLower}}) {
-        if (err) {
-            return cb(err);
-        }
-
-        cb(null, {{modelNameToLower}});
-    });
+    {{modelName}}.create({{modelNameToLower}}Data)
+        .then({{modelNameToLower}} => cb(null, {{modelNameToLower}}))
+        .catch(err => cb(err));
 };
 
 
@@ -34,16 +30,12 @@ exports.create = function create({{modelNameToLower}}Data, cb) {
  * @param {Object}  query   Query Object
  * @param {Function} cb Callback for once delete is complete
  */
-exports.remove = function remove(query, cb) {
+export function remove(query, cb) {
     console.log('deleting {{modelNameToLower}}: ', query);
     {{modelName}}
-        .findOneAndRemove(query, function delete{{modelName}}(err, {{modelNameToLower}}) {
-            if (err) {
-                return cb(err);
-            }
-
-            cb(null, {{modelNameToLower}});
-        });
+        .findOneAndDelete(query)
+        .then({{modelNameToLower}} => cb(null, {{modelNameToLower}}))
+        .catch(err => cb(err));
 };
 
 
@@ -56,19 +48,14 @@ exports.remove = function remove(query, cb) {
  * @param {Object} updates  Update data
  * @param {Function} cb Callback for once update is complete
  */
-exports.update = function update(query, updates, cb) {
+export function update(query, updates, cb) {
     console.log('updating {{modelNameToLower}}: ', query);
 
     {{modelName}}
         .findOneAndUpdate(query, { $set: updates }, {new: true}) // option to return the new document
         .populate(population)
-        .exec(function update{{modelName}}(err, {{modelNameToLower}}) {
-            if (err) {
-                return cb(err);
-            }
-
-            cb(null, {{modelNameToLower}} || {});
-        });
+        .then({{modelNameToLower}} => cb(null, {{modelNameToLower}} || {}))
+        .catch(err => cb(err));
 };
 
 
@@ -80,18 +67,13 @@ exports.update = function update(query, updates, cb) {
  * @param {Object} query Query Object
  * @param {Function} cb Callback for once fetch is complete
  */
-exports.get = function get(query, cb) {
+export function get(query, cb) {
     console.log('getting {{modelNameToLower}} ', query);
     {{modelName}}
         .findOne(query)
         .populate(population)
-        .exec(function (err, {{modelNameToLower}}) {
-            if (err) {
-                return cb(err);
-            }
-
-            cb(null, {{modelNameToLower}} || {});
-        });
+        .then({{modelNameToLower}} => cb(null, {{modelNameToLower}} || {}))
+        .catch(err => cb(err));
 };
 
 
@@ -103,20 +85,15 @@ exports.get = function get(query, cb) {
  * @param {Object} query Query Object
  * @param {Function} cb Callback for once fetch is complete
  */
-exports.search = function search(options, cb) {
+export function search(options, cb) {
     console.log('Searching a collection of {{modelNamePluralToLower}}');
     {{modelName}}.find(options.filter, options.fields)
         .populate(population)
         .sort(options.sort)
         .limit(options.limit)
         .skip(options.limit * (options.page - 1))
-        .exec(function search{{modelNamePlural}}(err, {{modelNamePluralToLower}}) {
-            if (err) {
-                return cb(err);
-            }
-
-            cb(null, {{modelNamePluralToLower}});
-        });
+        .then({{modelNamePluralToLower}} => cb(null, {{modelNamePluralToLower}}))
+        .catch(err => cb(err));
 };
 
 /**
@@ -126,12 +103,8 @@ exports.search = function search(options, cb) {
  *
  * @param {Function} cb Callback for once fetch is complete
  */
-exports.count = function count(filter, cb) {
-  {{modelName}}.countDocuments(filter, function (err, count) {
-      if (err) {
-        return cb(err);
-      }
-
-      cb(null, count);
-    });
+export function count(filter, cb) {
+  {{modelName}}.countDocuments(filter)
+      .then(count => cb(null, count))
+      .catch(err => cb(err));
 };

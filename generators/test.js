@@ -1,15 +1,20 @@
 /*
  *  Load module dependencies
  */
-var events = require('events');
-var fs = require('fs-extra');
-var clone = require('clone');
-var pluralize = require('pluralize');
+import events from 'events';
+import fs from 'fs-extra';
+import clone from 'clone';
+import pluralize from 'pluralize';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /*
  *  Set file options
  */
-var opts = {
+const opts = {
     encoding: 'utf8'
 };
 
@@ -21,8 +26,8 @@ var opts = {
  *  3. Create test file
  *  4. Iterate through steps 1-5 until all test files are generated
  */
-var workflow = new events.EventEmitter();
-var appSettings = {};
+const workflow = new events.EventEmitter();
+let appSettings = {};
 
 
 /*
@@ -34,16 +39,16 @@ var appSettings = {};
  *  @param {workflowCallback} cb - The callback to handle end of the models generation process.
  */
 workflow.on('readTestTemplate', function readTestTemplate(models, cb) {
-    var allModels = clone(models);
+    let allModels = clone(models);
 
     // Make sure that all models have been generated
     if (allModels.length) {
-        var currentModel = allModels.pop();
+        let currentModel = allModels.pop();
 
         fs.readFile(__dirname + '/../templates/test.js.template', opts, function rf(err, testFile) {
             if (err) {
                 // Error handling
-                cb(err);
+                return cb(err);
             }
 
             // Replace the file tokens
@@ -100,7 +105,7 @@ workflow.on('createTestFile', function createTestFile(models, currentModel, test
     fs.writeFile(getTestFileName(currentModel.name), testFile, opts, function rf(err, data) {
         if (err) {
             // Error handling
-            cb(err);
+            return cb(err);
         }
 
         // This is called to iterate through all models
@@ -117,7 +122,7 @@ workflow.on('createTestFile', function createTestFile(models, currentModel, test
  *  @returns {String} the replacement string
  */
 function modelFields(model) {
-    var tokenReplacement = [];
+    let tokenReplacement = [];
 
     model.attributes.forEach(function (attribute) {
         // TODO: check the output to be string or int
@@ -139,9 +144,7 @@ function getTestFileName(modelName){
     return appSettings.directory + "/test/" + modelName.toLowerCase() + '.js' ;
 }
 
-exports.generate = function generateTests(settings, cb) {
+export function generate(settings, cb) {
     appSettings = settings;
     workflow.emit('readTestTemplate', settings.models, cb);
 };
-
-

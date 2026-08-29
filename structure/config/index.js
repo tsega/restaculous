@@ -1,10 +1,8 @@
 // Required configuration
 
-module.exports = {
-  HTTP_PORT: parseInt(process.env.HTTP_PORT),
-  MONGODB_URL: process.env.MONGODB_URL,
-  SALT_LENGTH: parseInt(process.env.SALT_LENGTH),
-  JWT_KEY: process.env.JWT_KEY,
-  MAX_PAGE_SIZE: parseInt(process.env.MAX_PAGE_SIZE),
-  DEFAULT_SORT: process.env.DEFAULT_SORT
-};
+export const HTTP_PORT = parseInt(process.env.HTTP_PORT);
+export const MONGODB_URL = process.env.MONGODB_URL;
+export const SALT_LENGTH = parseInt(process.env.SALT_LENGTH);
+export const JWT_KEY = process.env.JWT_KEY;
+export const MAX_PAGE_SIZE = parseInt(process.env.MAX_PAGE_SIZE);
+export const DEFAULT_SORT = process.env.DEFAULT_SORT;

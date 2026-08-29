@@ -1,46 +1,24 @@
-/*
- *  Load module dependencies
- */
-var events = require('events');
-var { exec } = require('child_process');
+import events from 'events';
+import { exec } from 'child_process';
 
-/*
- *  Set file options
- */
-var opts = {
-  encoding: 'utf8'
+const opts = {
+    encoding: 'utf8',
+    maxBuffer: 1024 * 1024 * 10 // 10MB
 };
 
-/*
- *  Dependencies Installer Flow
- *
- *  Install dependencies
- */
-var workflow = new events.EventEmitter();
-var appSettings = {};
+const workflow = new events.EventEmitter();
+let appSettings = {};
 
-/*
- *  installDependencies
- *
- *  Install dependencies by running `npm install` in app directory.
- *
- *  @param {workflowCallback} cb - The callback to handle end of the install process.
- */
 workflow.on('installDependencies', function installDependencies(cb) {
-    exec(`cd ${appSettings.directory} && npm install`, function (err){
+    exec(`cd ${appSettings.directory} && npm install`, opts, function done(err, stdout, stderr) {
         if (err) {
-          // Error handling
-          cb(err);
+            return cb(err);
         }
-
-        // Finish base generator workflow
-        cb(null);
+        cb(null, stdout);
     });
 });
 
-exports.generate = function generateConfig(settings, cb) {
+export const generate = function generateDependencies(settings, cb) {
     appSettings = settings;
     workflow.emit('installDependencies', cb);
 };
-
-

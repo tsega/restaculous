@@ -1,13 +1,18 @@
 /*
  *  Load module dependencies
  */
-var events = require('events');
-var fs = require('fs-extra');
+import events from 'events';
+import fs from 'fs-extra';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /*
  *  Set file options
  */
-var opts = {
+const opts = {
     encoding: 'utf8'
 };
 
@@ -16,7 +21,7 @@ var opts = {
  *
  *  1. Copy structure auth folder into the generated structure
  */
-var workflow = new events.EventEmitter();
+const workflow = new events.EventEmitter();
 
 /*
  *  copyAuth
@@ -30,13 +35,13 @@ workflow.on('copyAuth', function copyAuth(settings, cb) {
     fs.copy(__dirname + '/../auth/', settings.directory, function done(err) {
         if (err) {
             // Error handling
-            cb(err);
+            return cb(err);
         }
 
         cb(null);
     });
 });
 
-exports.generate = function generateAuth(settings, cb) {
+export const generate = function generateAuth(settings, cb) {
     workflow.emit('copyAuth', settings, cb);
 };

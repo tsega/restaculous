@@ -1,10 +1,10 @@
 // Load Modules
-var jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
 // Get Config file
-var { JWT_KEY } = require("../config");
+import { JWT_KEY } from "../config/index.js";
 
-exports.checkAuthToken = (req, res, next) => {
+export const checkAuthToken = (req, res, next) => {
   try {
     var token = req.headers.authorization.split(" ")[1];
     var decoded = jwt.verify(token, JWT_KEY);

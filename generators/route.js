@@ -1,16 +1,21 @@
 /*
  *  Load module dependencies
  */
-var events = require('events');
-var fs = require('fs-extra');
-var clone = require('clone');
-var pluralize = require('pluralize');
-var { ACTIONS } = require('../config');
+import events from 'events';
+import fs from 'fs-extra';
+import clone from 'clone';
+import pluralize from 'pluralize';
+import { ACTIONS } from '../config/index.js';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /*
  *  Set file options
  */
-var opts = {
+const opts = {
     encoding: 'utf8'
 };
 
@@ -22,8 +27,8 @@ var opts = {
  *  3. Create route file
  *  4. Iterate through steps 1-5 until all route files are generated
  */
-var workflow = new events.EventEmitter();
-var appSettings = {};
+const workflow = new events.EventEmitter();
+let appSettings = {};
 
 
 /*
@@ -35,16 +40,16 @@ var appSettings = {};
  *  @param {workflowCallback} cb - The callback to handle end of the models generation process.
  */
 workflow.on('readRouteTemplate', function readRouteTemplate(models, cb) {
-    var allModels = clone(models);
+    const allModels = clone(models);
 
     // Make sure that all models have been generated
     if (allModels.length) {
-        var currentModel = allModels.pop();
+        const currentModel = allModels.pop();
 
         fs.readFile(`${__dirname}/../templates/route.js.template`, opts, function rf(err, routeFile) {
             if (err) {
                 // Error handling
-                cb(err);
+                return cb(err);
             }
 
             // Replace the file tokens
@@ -101,8 +106,8 @@ workflow.on('replaceRouteTokens', function replaceRouteTokens(models, currentMod
     routeFile = routeFile.replace(/\{\{modelUpdateParamsExample\}\}/g, updateParamExampleToken(currentModel));
 
     // 'Auth' tokens replacement
-    var authTokens = getAuthTokens(currentModel);
-    var checkAuthImportToken = "";
+    const authTokens = getAuthTokens(currentModel);
+    let checkAuthImportToken = "";
     routeFile = routeFile.replace(/\{\{postAuth\}\}/g, authTokens.post);
     routeFile = routeFile.replace(/\{\{getAuth\}\}/g, authTokens.get);
     routeFile = routeFile.replace(/\{\{putAuth\}\}/g, authTokens.put);
@@ -110,7 +115,7 @@ workflow.on('replaceRouteTokens', function replaceRouteTokens(models, currentMod
     routeFile = routeFile.replace(/\{\{searchAuth\}\}/g, authTokens.search);
 
     if(authTokens.post || authTokens.get || authTokens.put || authTokens.delete || authTokens.search) {
-        checkAuthImportToken =  "var { checkAuthToken } = require('../lib/auth\');";
+        checkAuthImportToken = "import { checkAuthToken } from '../lib/auth.js';";
     }
 
     routeFile = routeFile.replace(/\{\{checkAuthImportToken\}\}/g, checkAuthImportToken);
@@ -134,7 +139,7 @@ workflow.on('createRouteFile', function createRouteFile(models, currentModel, ro
     fs.writeFile(getRouteFileName(currentModel.name), routeFile, opts, function rf(err, data) {
         if (err) {
             // Error handling
-            cb(err);
+            return cb(err);
         }
 
         // This is called to iterate through all models
@@ -430,7 +435,7 @@ function getRouteFileName(modelName){
     return `${appSettings.directory}/routes/${modelName.toLowerCase()}.js` ;
 }
 
-exports.generate = function generateRoutes(settings, cb) {
+export const generate = function generateRoutes(settings, cb) {
     appSettings = settings;
     workflow.emit('readRouteTemplate', appSettings.models, cb);
 };

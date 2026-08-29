@@ -1,14 +1,19 @@
 /*
  *  Load module dependencies
  */
-var events = require('events');
-var fs = require('fs-extra');
-var pluralize = require('pluralize');
+import events from 'events';
+import fs from 'fs-extra';
+import pluralize from 'pluralize';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /*
  *  Set file options
  */
-var opts = {
+const opts = {
     encoding: 'utf8'
 };
 
@@ -25,8 +30,8 @@ var opts = {
  *  8. Replace tokens in package.json template
  *  9. Create package.json file
  */
-var workflow = new events.EventEmitter();
-var appSettings = {};
+const workflow = new events.EventEmitter();
+let appSettings = {};
 
 
 /*
@@ -40,7 +45,7 @@ workflow.on('readConfigTemplate', function readConfigTemplate(cb) {
     fs.readFile(__dirname + '/../templates/_config.js.template', opts, function rf(err, configFile) {
         if (err) {
             // Error handling
-            cb(err);
+            return cb(err);
         }
 
         // Replace the file tokens
@@ -57,10 +62,10 @@ workflow.on('readConfigTemplate', function readConfigTemplate(cb) {
  *  @param {workflowCallback} cb - The callback to handle end of the dals generation process.
  */
 workflow.on('replaceConfigTokens', function replaceConfigTokens(configFile, cb) {
-    var tokenReplacement = "";
+    let tokenReplacement = "";
 
     appSettings.config.forEach(function(config){
-        configValue = typeof config.value == "string" ? `"${config.value}"` : config.value;
+        let configValue = typeof config.value == "string" ? `"${config.value}"` : config.value;
         tokenReplacement += `${config.name}=${configValue}\n`;
     });
 
@@ -82,7 +87,7 @@ workflow.on('createConfigFile', function createConfigFile(configFile, cb) {
     fs.writeFile(appSettings.directory + '/.env', configFile, opts, function rf(err) {
         if (err) {
             // Error handling
-            cb(err);
+            return cb(err);
         }
 
         // Move to generating the routes/index.js file
@@ -101,7 +106,7 @@ workflow.on('readRouterTemplate', function readRouterTemplate(cb) {
     fs.readFile(__dirname + '/../templates/_router.js.template', opts, function rf(err, routerFile) {
         if (err) {
             // Error handling
-            cb(err);
+            return cb(err);
         }
 
         // Replace the file tokens
@@ -118,16 +123,16 @@ workflow.on('readRouterTemplate', function readRouterTemplate(cb) {
  *  @param {workflowCallback} cb - The callback to handle end of the dals generation process.
  */
 workflow.on('replaceRouterTokens', function replaceRouterTokens(routerFile, cb) {
-    var requireTokens = [];
-    var initializeTokens = [];
-    var userRouterRequireToken = `var userRouter = require("./user");`;
-    var userRouterToken = `
+    let requireTokens = [];
+    let initializeTokens = [];
+    const userRouterRequireToken = `import userRouter from "./user.js";`;
+    const userRouterToken = `
         // Users Endpoint
         app.use("/users", userRouter);
     `;
 
     appSettings.models.forEach(function(model){
-        requireTokens.push("var " + model.name.toLowerCase() + "Router = require('./" + model.name.toLowerCase() + "');");
+        requireTokens.push("import " + model.name.toLowerCase() + "Router from './" + model.name.toLowerCase() + ".js';");
         initializeTokens.push("\t // " + model.name + " Endpoint");
         initializeTokens.push("\t app.use('/"+ pluralize(model.name.toLowerCase()) +"', "+ model.name.toLowerCase() +"Router);\n");
     });
@@ -149,13 +154,13 @@ workflow.on('replaceRouterTokens', function replaceRouterTokens(routerFile, cb) 
  *  Creates the actual router file on disk.
  *
  *  @param {string}  routerFile - The string version of the template file.
- *  @param {workflowCallback} cb - The callback to handle end of the generation process.
+ *  @param {workflowCallback} cb - The callback to handle end of the dals generation process.
  */
 workflow.on('createRouterFile', function createRouterFile(routerFile, cb) {
     fs.writeFile(appSettings.directory + '/routes/index.js', routerFile, opts, function rf(err) {
         if (err) {
             // Error handling
-            cb(err);
+            return cb(err);
         }
 
         // Move to generating the package.json file
@@ -174,7 +179,7 @@ workflow.on('readPackageTemplate', function readPackageTemplate(cb) {
     fs.readFile(__dirname + '/../templates/_package.json.template', opts, function rf(err, packageFile) {
         if (err) {
             // Error handling
-            cb(err);
+            return cb(err);
         }
 
         // Replace the file tokens
@@ -191,8 +196,8 @@ workflow.on('readPackageTemplate', function readPackageTemplate(cb) {
  *  @param {workflowCallback} cb - The callback to handle end of the dals generation process.
  */
 workflow.on('replacePackageTokens', function replacePackageTokens(packageFile, cb) {
-    var appName = appSettings.name.toLowerCase().replace(/\s/g, "-");
-    var appDescription = appSettings.description;
+    const appName = appSettings.name.toLowerCase().replace(/\s/g, "-");
+    const appDescription = appSettings.description;
 
     packageFile = packageFile.replace(/\{\{appName\}\}/g, appName);
     packageFile = packageFile.replace(/\{\{appDescription\}\}/g, appDescription);
@@ -209,13 +214,13 @@ workflow.on('replacePackageTokens', function replacePackageTokens(packageFile, c
  *  Creates the actual package file on disk.
  *
  *  @param {string}  packageFile - The string version of the template file.
- *  @param {workflowCallback} cb - The callback to handle end of the generation process.
+ *  @param {workflowCallback} cb - The callback to handle end of the dals generation process.
  */
 workflow.on('createPackageFile', function createPackageFile(packageFile, cb) {
     fs.writeFile(appSettings.directory + '/package.json', packageFile, opts, function rf(err) {
         if (err) {
             // Error handling
-            cb(err);
+            return cb(err);
         }
 
         // Finish base generator workflow
@@ -223,7 +228,7 @@ workflow.on('createPackageFile', function createPackageFile(packageFile, cb) {
     });
 });
 
-exports.generate = function generateConfig(settings, cb) {
+export const generate = function generateConfig(settings, cb) {
     appSettings = settings;
     workflow.emit('readConfigTemplate', cb);
 };
