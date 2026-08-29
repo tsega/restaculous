@@ -248,6 +248,71 @@ test("settings validation rejects unsupported authentication actions", () => {
   );
 });
 
+test("settings validation rejects unsupported field types and rules", () => {
+  const unsupportedType = createValidSettings();
+  unsupportedType.models[0].attributes[0].type = "Buffer";
+  assert.throws(
+    () => validateSettings(unsupportedType),
+    /attributes\.0\.type.*expected one of/
+  );
+
+  const unsupportedRule = createValidSettings();
+  unsupportedRule.models[0].attributes[0].validation = [
+    { type: "customValidator" }
+  ];
+  assert.throws(
+    () => validateSettings(unsupportedRule),
+    /validation\.0\.type.*expected one of/
+  );
+});
+
+test("settings validation rejects incompatible rules and invalid arguments", () => {
+  const incompatible = createValidSettings();
+  incompatible.models[0].attributes[0] = {
+    name: "rating",
+    type: "Number",
+    validation: [{ type: "isEmail" }]
+  };
+  assert.throws(
+    () => validateSettings(incompatible),
+    /isEmail.*incompatible with field type.*Number/i
+  );
+
+  const invalidArguments = createValidSettings();
+  invalidArguments.models[0].attributes[0].validation = [
+    { type: "isLength", args: [{ min: -1 }] }
+  ];
+  assert.throws(
+    () => validateSettings(invalidArguments),
+    /non-negative integers/
+  );
+
+  invalidArguments.models[0].attributes[0].validation = [
+    { type: "isLength", args: [{ min: 0 }] }
+  ];
+  assert.throws(
+    () => validateSettings(invalidArguments),
+    /must define max or a positive min/
+  );
+});
+
+test("settings validation accepts supported validator arguments", () => {
+  const settings = createValidSettings();
+  settings.models[0].attributes[0].validation = [
+    { type: "notEmpty", message: "Title is required" },
+    {
+      type: "isLength",
+      message: "Title must be 2 to 100 characters",
+      args: [{ min: 2, max: 100 }]
+    }
+  ];
+
+  const validated = validateSettings(settings);
+  assert.deepEqual(validated.models[0].attributes[0].validation[1].args, [
+    { min: 2, max: 100 }
+  ]);
+});
+
 test("settings loader accepts a valid relative path", async (t) => {
   const fixtureDirectory = await mkdtemp(
     path.join(tmpdir(), "restaculous-settings-test-")
@@ -521,6 +586,82 @@ test("route generator emits an ES module authentication import", async (t) => {
     /import \{ checkAuthToken \} from "\.\.\/middleware\/auth\.js";/
   );
   assert.doesNotMatch(route, /require\(/);
+});
+
+test("generators emit supported field validation and endpoint tests", async (t) => {
+  const outputDirectory = await mkdtemp(
+    path.join(tmpdir(), "restaculous-validation-test-")
+  );
+  t.after(() => rm(outputDirectory, { recursive: true, force: true }));
+  await mkdir(path.join(outputDirectory, "src", "routes", "validators"), {
+    recursive: true
+  });
+  await mkdir(path.join(outputDirectory, "test"), { recursive: true });
+
+  const settings = validateSettings({
+    name: "Movies",
+    directory: outputDirectory,
+    models: [
+      {
+        name: "Movie",
+        routes: ["post", "put"],
+        attributes: [
+          {
+            name: "title",
+            type: "String",
+            example: "Alien",
+            validation: [
+              { type: "notEmpty", message: "Title is required" },
+              { type: "isLength", args: [{ min: 2, max: 100 }] }
+            ]
+          },
+          {
+            name: "rating",
+            type: "Number",
+            example: 5,
+            validation: [{ type: "isInt" }]
+          },
+          {
+            name: "published",
+            type: "Boolean",
+            example: true,
+            validation: [{ type: "isBoolean" }]
+          },
+          {
+            name: "releasedAt",
+            type: "Date",
+            example: "1979-05-25",
+            validation: [{ type: "isISO8601" }]
+          }
+        ]
+      }
+    ]
+  });
+
+  await runGenerator(generateValidators, settings);
+  await runGenerator(generateTests, settings);
+
+  const validator = await readFile(
+    path.join(outputDirectory, "src/routes/validators/movie.js"),
+    "utf8"
+  );
+  assert.match(validator, /\.notEmpty\(\)/);
+  assert.match(validator, /\.isLength\(\{"min":2,"max":100\}\)/);
+  assert.match(validator, /\.optional\(\)\s+\.isLength/);
+  assert.match(validator, /\.isInt\(\)/);
+  assert.match(validator, /\.isBoolean\(\)/);
+  assert.match(validator, /\.isISO8601\(\)/);
+
+  const generatedTests = await readFile(
+    path.join(outputDirectory, "test/movie.test.js"),
+    "utf8"
+  );
+  assert.match(generatedTests, /rejects invalid title values for notEmpty/);
+  assert.match(generatedTests, /rejects invalid rating values for isInt/);
+  assert.match(generatedTests, /rejects invalid published values for isBoolean/);
+  assert.match(generatedTests, /rejects invalid releasedAt values for isISO8601/);
+  assert.match(generatedTests, /allows validated fields to be omitted when updating/);
+  execFileSync(process.execPath, ["--check", path.join(outputDirectory, "test/movie.test.js")]);
 });
 
 test("generators produce a clean src-based application without a DAL", async (t) => {

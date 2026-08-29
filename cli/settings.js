@@ -4,6 +4,11 @@ import path from "node:path";
 import { z } from "zod";
 
 import { ACTIONS } from "../config/index.js";
+import {
+  FIELD_TYPES,
+  getValidationIssue,
+  VALIDATION_RULES
+} from "./field-validation.js";
 
 const actionSchema = z.enum(ACTIONS);
 const configEntrySchema = z.object({
@@ -11,14 +16,21 @@ const configEntrySchema = z.object({
   value: z.union([z.string(), z.number(), z.boolean()]),
   comment: z.string().default("")
 });
+const validationArgumentSchema = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+]);
 const attributeSchema = z.object({
   name: z.string().trim().min(1),
-  type: z.string().trim().min(1),
+  type: z.enum(FIELD_TYPES),
   desc: z.string().default(""),
   example: z.union([z.string(), z.number(), z.boolean()]).default(""),
   validation: z.array(z.object({
-    type: z.string().trim().min(1),
-    message: z.string().default("")
+    type: z.enum(Object.keys(VALIDATION_RULES)),
+    message: z.string().default(""),
+    args: z.array(validationArgumentSchema).default([])
   })).default([]),
   isPrivate: z.boolean().default(false),
   isAuto: z.boolean().default(false)
@@ -48,6 +60,25 @@ const settingsSchema = z.object({
   models: z.array(modelSchema).default([])
 }).superRefine((settings, context) => {
   settings.models.forEach((model, index) => {
+    model.attributes.forEach((attribute, attributeIndex) => {
+      attribute.validation.forEach((validation, validationIndex) => {
+        const issue = getValidationIssue(attribute.type, validation);
+        if (issue) {
+          context.addIssue({
+            code: "custom",
+            message: issue,
+            path: [
+              "models",
+              index,
+              "attributes",
+              attributeIndex,
+              "validation",
+              validationIndex
+            ]
+          });
+        }
+      });
+    });
     model.authentication.forEach((action) => {
       if (!model.routes.includes(action)) {
         context.addIssue({

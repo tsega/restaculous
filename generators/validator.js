@@ -144,9 +144,7 @@ function postFieldValidation(model) {
         // Validation based on setting
         if(attribute.validation) {
             attribute.validation.forEach(function(option) {
-                tokenReplacement += `
-                    body("${attribute.name}", "${option.message}")
-                        .${option.type}(),`;
+                tokenReplacement += validationExpression(attribute, option);
             });
         }
     });
@@ -171,15 +169,21 @@ function putFieldValidation(model) {
         let validatorList = attribute.validation.filter(o => !["isEmpty", "notEmpty"].includes(o.type));
 
         validatorList.forEach(function(option) {
-          tokenReplacement += `
-                body("${attribute.name}", "${option.message}")
-                  .optional()
-                  .${option.type}(),`;
+          tokenReplacement += validationExpression(attribute, option, true);
         });
       }
   });
 
   return tokenReplacement;
+}
+
+function validationExpression(attribute, option, optional = false) {
+  const args = option.args.map((argument) => JSON.stringify(argument)).join(", ");
+  const optionalCall = optional ? "\n                  .optional()" : "";
+
+  return `
+                body(${JSON.stringify(attribute.name)}, ${JSON.stringify(option.message)})${optionalCall}
+                  .${option.type}(${args}),`;
 }
 
 export function generate(settings, cb) {
