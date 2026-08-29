@@ -79,7 +79,7 @@ The application generated has the following features:
 
   - [x] Fully tested API endpoints with **CRUD** operations
   - [x] Express-Validator Integration
-  - [ ] OpenAPI documentation
+  - [x] OpenAPI documentation
   - [x] Linting of source to ensure proper code formatting
   - [x] **Authentication**
   - [ ] **Authorization**
@@ -115,12 +115,17 @@ You can generate an entire application by simply supplying a **json** settings f
 ```json
 {
   "name": "[name of the application]",
+  "version": "0.0.1",
   "description": "[small description about the application]",
   "author": "[author name] <author email>",
   "directory": "[the directory where to output the new application]",
   "repository": {
     "type": "[repository type]",
     "url": "[repository address]"
+  },
+  "documentation": {
+    "serverUrl": "https://api.example.com",
+    "accentColor": "#00dc82"
   },
   "config": [
     {
@@ -193,6 +198,7 @@ Here is a [Gist](https://gist.github.com/tsega/b15307af018d49171dfdbde47f0d2d07)
 ```json
 {
   "name": "[app-name]",
+  "version": "0.0.1",
   "description": "",
   "author": "",
   "directory": "",

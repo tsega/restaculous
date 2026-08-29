@@ -48,6 +48,7 @@ const modelSchema = z.object({
 });
 const settingsSchema = z.object({
   name: z.string().trim().min(1),
+  version: z.string().trim().min(1).default("0.0.1"),
   description: z.string().default(""),
   author: z.string().default(""),
   directory: z.string().trim().min(1),
@@ -55,6 +56,10 @@ const settingsSchema = z.object({
     type: z.string().default("git"),
     url: z.string().default("")
   }).default({}),
+  documentation: z.object({
+    serverUrl: z.string().trim().min(1).default("/"),
+    accentColor: z.string().regex(/^#[0-9a-f]{6}$/i).default("#00dc82")
+  }).default({ serverUrl: "/", accentColor: "#00dc82" }),
   authentication: z.boolean().default(false),
   config: z.array(configEntrySchema).optional(),
   models: z.array(modelSchema).default([])

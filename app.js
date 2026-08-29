@@ -6,6 +6,7 @@ import * as authGenerator from "./generators/auth.js";
 import * as baseGenerator from "./generators/base.js";
 import * as controllerGenerator from "./generators/controller.js";
 import * as dependenciesInstaller from "./generators/dependencies.js";
+import * as documentationGenerator from "./generators/documentation.js";
 import * as modelGenerator from "./generators/model.js";
 import * as routeGenerator from "./generators/route.js";
 import * as structureGenerator from "./generators/structure.js";
@@ -29,6 +30,7 @@ const services = {
   validators: validatorGenerator,
   tests: testGenerator,
   base: baseGenerator,
+  documentation: documentationGenerator,
   dependencies: dependenciesInstaller,
   format: formatter,
   lint: linter
@@ -43,6 +45,7 @@ const completionMessages = {
   validators: "Done Generating Validators",
   tests: "Done Generating Tests",
   base: "Done Generating config/index.js, routes/index.js and package.json",
+  documentation: "Done Generating API Documentation",
   dependencies: "Done Installing Dependencies",
   format: "Done Formatting Code",
   lint: "Done Linting Code"

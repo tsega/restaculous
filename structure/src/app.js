@@ -9,6 +9,11 @@ const app = express();
 
 app.use(requestLogger);
 app.use(express.json());
+app.get("/", (req, res) => {
+  void req;
+  res.redirect("/docs");
+});
+app.use("/docs", express.static("docs"));
 app.get("/health", healthCheck);
 initializeRoutes(app);
 app.use(notFoundHandler);

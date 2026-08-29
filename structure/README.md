@@ -57,3 +57,16 @@ is intentionally disposable.
 
 When authentication is enabled, the generated suite also covers registration,
 login, protected routes, rejected tokens, and the current-user endpoint.
+
+## API documentation
+
+Visit `/docs` for the generated API reference or download the OpenAPI 3.1
+document from `/docs/openapi.json`. The static site has no runtime dependency or
+build step and includes responsive endpoint navigation, search, light and dark
+themes, request and response schemas, and copy controls.
+
+Documentation is generated from `settings.json`. Set
+`documentation.serverUrl` to the deployed API URL and
+`documentation.accentColor` to a six-digit hexadecimal color. The generated
+HTML, CSS, and browser JavaScript in `docs/` are intentionally human-readable
+and can be customized directly after generation.

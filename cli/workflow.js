@@ -15,6 +15,7 @@ export async function runWorkflow(
     ["validators", services.validators.generate],
     ["tests", services.tests.generate],
     ["base", services.base.generate],
+    ["documentation", services.documentation.generate],
     ["dependencies", services.dependencies.generate],
     ["format", services.format.runFormatter],
     ["lint", services.lint.runLinter]
