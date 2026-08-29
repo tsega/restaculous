@@ -46,3 +46,6 @@ Tests connect exclusively through `TEST_MONGODB_URL`; they never fall back to
 files run serially, and generated test data is removed from the test database
 before Mongoose disconnects. Always use a dedicated database because its data
 is intentionally disposable.
+
+When authentication is enabled, the generated suite also covers registration,
+login, protected routes, rejected tokens, and the current-user endpoint.

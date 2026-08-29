@@ -588,6 +588,22 @@ test("route generator emits an ES module authentication import", async (t) => {
   assert.doesNotMatch(route, /require\(/);
 });
 
+test("authentication tests are generated only with authentication", async (t) => {
+  const outputDirectory = await mkdtemp(
+    path.join(tmpdir(), "restaculous-no-auth-test-")
+  );
+  t.after(() => rm(outputDirectory, { recursive: true, force: true }));
+
+  await runGenerator(generateStructure, {
+    directory: outputDirectory,
+    authentication: false
+  });
+
+  await assert.rejects(
+    readFile(path.join(outputDirectory, "test/auth.test.js"), "utf8")
+  );
+});
+
 test("generators emit supported field validation and endpoint tests", async (t) => {
   const outputDirectory = await mkdtemp(
     path.join(tmpdir(), "restaculous-validation-test-")
@@ -707,6 +723,7 @@ test("generators produce a clean src-based application without a DAL", async (t)
     "src/middleware/errors.js",
     "src/middleware/request-logger.js",
     "src/utils/logger.js",
+    "test/auth.test.js",
     "test/movie.test.js",
     ".env.example",
     "package.json"
@@ -757,6 +774,26 @@ test("generators produce a clean src-based application without a DAL", async (t)
     await readFile(path.join(outputDirectory, "package.json"), "utf8")
   );
   assert.match(generatedPackage.scripts.test, /--test-concurrency=1/);
+
+  const authenticationTests = await readFile(
+    path.join(outputDirectory, "test/auth.test.js"),
+    "utf8"
+  );
+  assert.match(authenticationTests, /registers a user/);
+  assert.match(authenticationTests, /rejects invalid registration fields/);
+  assert.match(
+    authenticationTests,
+    /logs in a registered user and returns a token/
+  );
+  assert.match(authenticationTests, /rejects invalid login credentials/);
+  assert.match(
+    authenticationTests,
+    /allows a valid token to access a protected endpoint/
+  );
+  assert.match(authenticationTests, /rejects a missing authentication token/);
+  assert.match(authenticationTests, /rejects an invalid authentication token/);
+  assert.match(authenticationTests, /rejects an expired authentication token/);
+  assert.match(authenticationTests, /returns the current user for a valid token/);
 
   const files = execFileSync("find", [outputDirectory, "-name", "*.js"], {
     encoding: "utf8"
