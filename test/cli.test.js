@@ -719,11 +719,13 @@ test("generators produce a clean src-based application without a DAL", async (t)
     "src/controllers/movie.js",
     "src/models/movie.js",
     "src/routes/movie.js",
+    "src/routes/health.js",
     "src/services/auth.js",
     "src/middleware/errors.js",
     "src/middleware/request-logger.js",
     "src/utils/logger.js",
     "test/auth.test.js",
+    "test/health.test.js",
     "test/movie.test.js",
     ".env.example",
     "package.json"
@@ -760,6 +762,21 @@ test("generators produce a clean src-based application without a DAL", async (t)
     "utf8"
   );
   assert.match(generatedApp, /app\.use\(requestLogger\)/);
+  assert.match(generatedApp, /app\.get\("\/health", healthCheck\)/);
+
+  const healthRoute = await readFile(
+    path.join(outputDirectory, "src/routes/health.js"),
+    "utf8"
+  );
+  assert.match(healthRoute, /res\.json\(\{ status: "ok" \}\)/);
+  assert.doesNotMatch(healthRoute, /mongoose|MONGODB|process\.env/);
+
+  const healthTest = await readFile(
+    path.join(outputDirectory, "test/health.test.js"),
+    "utf8"
+  );
+  assert.match(healthTest, /get\("\/health"\)\.expect\(200\)/);
+  assert.match(healthTest, /deepEqual\(response\.body, \{ status: "ok" \}\)/);
 
   const testSetup = await readFile(
     path.join(outputDirectory, "test/setup.js"),

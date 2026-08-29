@@ -13,6 +13,14 @@ npm start
 npm test
 ```
 
+## Health monitoring
+
+`GET /health` returns `{ "status": "ok" }` when the application process is
+running. It is public, contains no system or configuration details, and does
+not query MongoDB. This makes it suitable as a lightweight liveness check;
+database readiness should be monitored separately when a deployment requires
+it.
+
 ## Configuration
 
 Copy `.env.example` to `.env` and provide values appropriate for the current
