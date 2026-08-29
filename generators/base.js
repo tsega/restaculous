@@ -215,6 +215,7 @@ workflow.on('replacePackageTokens', function replacePackageTokens(packageFile, c
     const appDescription = appSettings.description;
 
     packageFile = packageFile.replace(/\{\{appName\}\}/g, appName);
+    packageFile = packageFile.replace(/\{\{appVersion\}\}/g, appSettings.version);
     packageFile = packageFile.replace(/\{\{appDescription\}\}/g, appDescription);
     packageFile = packageFile.replace(/\{\{author\}\}/g, appSettings.author);
     packageFile = packageFile.replace(/\{\{repositoryType\}\}/g, appSettings.repository.type);

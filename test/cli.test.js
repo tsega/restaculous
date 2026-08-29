@@ -12,6 +12,10 @@ import { generate as generateStructure } from "../generators/structure.js";
 import { generate as generateAuthentication } from "../generators/auth.js";
 import { generate as generateModels } from "../generators/model.js";
 import { generate as generateControllers } from "../generators/controller.js";
+import {
+  buildOpenApiDocument,
+  generate as generateDocumentation
+} from "../generators/documentation.js";
 import { generate as generateValidators } from "../generators/validator.js";
 import { generate as generateTests } from "../generators/test.js";
 import { generate as generateBase } from "../generators/base.js";
@@ -336,6 +340,11 @@ test("settings validation supplies defaults for minimal configuration", () => {
   });
 
   assert.equal(settings.authentication, false);
+  assert.equal(settings.version, "0.0.1");
+  assert.deepEqual(settings.documentation, {
+    serverUrl: "/",
+    accentColor: "#00dc82"
+  });
   assert.deepEqual(settings.models, []);
   assert.equal(
     settings.config.find(({ name }) => name === "MONGODB_URL").value,
@@ -344,6 +353,17 @@ test("settings validation supplies defaults for minimal configuration", () => {
   assert.equal(
     settings.config.find(({ name }) => name === "TEST_MONGODB_URL").value,
     "mongodb://127.0.0.1:27017/movies-api-test"
+  );
+});
+
+test("settings validation rejects invalid documentation accent colors", () => {
+  assert.throws(
+    () => validateSettings({
+      name: "Movies",
+      directory: "./movies",
+      documentation: { accentColor: "green" }
+    }),
+    /documentation\.accentColor.*invalid string/
   );
 });
 
@@ -383,6 +403,7 @@ test("workflow runs all stages in order when authentication is enabled", async (
     "validators",
     "tests",
     "base",
+    "documentation",
     "dependencies",
     "format",
     "lint"
@@ -390,6 +411,78 @@ test("workflow runs all stages in order when authentication is enabled", async (
 
   assert.deepEqual(calls, expectedStages);
   assert.deepEqual(completed, expectedStages);
+});
+
+test("OpenAPI generation reflects routes, fields, and authentication", () => {
+  const settings = validateSettings({
+    name: "Movies API",
+    version: "2.1.0",
+    description: "Movie catalogue",
+    directory: "./movies",
+    authentication: true,
+    documentation: { serverUrl: "https://api.example.com", accentColor: "#7c3aed" },
+    models: [{
+      name: "Movie",
+      routes: ["post", "get", "search"],
+      authentication: ["get"],
+      attributes: [
+        { name: "title", type: "String", desc: "Movie title", example: "Alien", validation: [{ type: "notEmpty" }] },
+        { name: "secret", type: "String", isPrivate: true },
+        { name: "slug", type: "String", isAuto: true }
+      ],
+      relations: [{ name: "Genre", referenceType: "single" }]
+    }]
+  });
+
+  const document = buildOpenApiDocument(settings);
+  assert.equal(document.openapi, "3.1.0");
+  assert.equal(document.info.version, "2.1.0");
+  assert.equal(document.servers[0].url, "https://api.example.com");
+  assert.ok(document.paths["/movies"]?.post);
+  assert.ok(document.paths["/movies/{movieId}"]?.get);
+  assert.ok(document.paths["/movies/search"]?.get);
+  assert.equal(document.paths["/movies/{movieId}"]?.put, undefined);
+  assert.deepEqual(document.paths["/movies/{movieId}"].get.security, [{ bearerAuth: [] }]);
+  assert.equal(document.paths["/movies"].post.security, undefined);
+  assert.equal(document.components.schemas.Movie.properties.secret, undefined);
+  assert.equal(document.components.schemas.MovieCreate.properties.secret.type, "string");
+  assert.equal(document.components.schemas.MovieCreate.properties.slug, undefined);
+  assert.equal(document.components.schemas.Movie.properties.slug.type, "string");
+  assert.deepEqual(document.components.schemas.Movie.required, ["title"]);
+  assert.equal(
+    document.components.schemas.Movie.properties.title["x-validation"][0].type,
+    "notEmpty"
+  );
+  assert.equal(document.components.schemas.Movie.properties.genre.type, "string");
+  assert.ok(document.paths["/users/login"]?.post);
+  assert.equal(document["x-docs"].accentColor, "#7c3aed");
+});
+
+test("minimal settings generate a valid health-only OpenAPI document", () => {
+  const document = buildOpenApiDocument(validateSettings({
+    name: "Minimal API",
+    directory: "./minimal-api"
+  }));
+
+  assert.ok(document.paths["/health"].get);
+  assert.deepEqual(document.components.securitySchemes, {});
+  assert.equal(Object.keys(document.paths).length, 1);
+});
+
+test("minimal settings generate the complete documentation directory", async (t) => {
+  const outputDirectory = await mkdtemp(
+    path.join(tmpdir(), "restaculous-docs-test-")
+  );
+  t.after(() => rm(outputDirectory, { recursive: true, force: true }));
+  const settings = validateSettings({
+    name: "Minimal API",
+    directory: outputDirectory
+  });
+
+  await runGenerator(generateDocumentation, settings);
+  for (const file of ["index.html", "styles.css", "app.js", "openapi.json"]) {
+    await readFile(path.join(outputDirectory, "docs", file), "utf8");
+  }
 });
 
 test("workflow skips authentication when it is disabled", async () => {
@@ -708,7 +801,8 @@ test("generators produce a clean src-based application without a DAL", async (t)
     generateRoutes,
     generateValidators,
     generateTests,
-    generateBase
+    generateBase,
+    generateDocumentation
   ]) {
     await runGenerator(generate, settings);
   }
@@ -725,9 +819,14 @@ test("generators produce a clean src-based application without a DAL", async (t)
     "src/middleware/request-logger.js",
     "src/utils/logger.js",
     "test/auth.test.js",
+    "test/documentation.test.js",
     "test/health.test.js",
     "test/movie.test.js",
     ".env.example",
+    "docs/index.html",
+    "docs/styles.css",
+    "docs/app.js",
+    "docs/openapi.json",
     "package.json"
   ];
   for (const file of expectedFiles) {
@@ -763,6 +862,37 @@ test("generators produce a clean src-based application without a DAL", async (t)
   );
   assert.match(generatedApp, /app\.use\(requestLogger\)/);
   assert.match(generatedApp, /app\.get\("\/health", healthCheck\)/);
+  assert.match(generatedApp, /res\.redirect\("\/docs"\)/);
+  assert.match(generatedApp, /app\.use\("\/docs", express\.static\("docs"\)\)/);
+
+  const generatedOpenApi = JSON.parse(
+    await readFile(path.join(outputDirectory, "docs/openapi.json"), "utf8")
+  );
+  assert.equal(generatedOpenApi.openapi, "3.1.0");
+  assert.ok(generatedOpenApi.paths["/movies/{movieId}"].get);
+  assert.equal(generatedOpenApi.paths["/movies"], undefined);
+  assert.deepEqual(
+    generatedOpenApi.paths["/movies/{movieId}"].get.security,
+    [{ bearerAuth: [] }]
+  );
+  for (const asset of ["index.html", "styles.css", "app.js", "openapi.json"]) {
+    assert.doesNotMatch(
+      await readFile(path.join(outputDirectory, "docs", asset), "utf8"),
+      /\{\{[^}]+\}\}/
+    );
+  }
+  const documentationHtml = await readFile(
+    path.join(outputDirectory, "docs/index.html"),
+    "utf8"
+  );
+  assert.match(documentationHtml, /<main id="content"/);
+  assert.match(documentationHtml, /aria-label="Endpoint navigation"/);
+  assert.match(documentationHtml, /aria-live="polite"/);
+  assert.doesNotMatch(documentationHtml, /(?:src|href)="https?:\/\//);
+  assert.doesNotMatch(
+    await readFile(path.join(outputDirectory, ".gitignore"), "utf8"),
+    /^docs\/$/m
+  );
 
   const healthRoute = await readFile(
     path.join(outputDirectory, "src/routes/health.js"),
@@ -790,6 +920,7 @@ test("generators produce a clean src-based application without a DAL", async (t)
   const generatedPackage = JSON.parse(
     await readFile(path.join(outputDirectory, "package.json"), "utf8")
   );
+  assert.equal(generatedPackage.version, "0.0.1");
   assert.match(generatedPackage.scripts.test, /--test-concurrency=1/);
 
   const authenticationTests = await readFile(
@@ -874,6 +1005,7 @@ function createWorkflowServices(calls, failingStage) {
     validators: service("validators"),
     tests: service("tests"),
     base: service("base"),
+    documentation: service("documentation"),
     dependencies: service("dependencies"),
     format: runner("format", "runFormatter"),
     lint: runner("lint", "runLinter")

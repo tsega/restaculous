@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="REST API documentation">
+    <title>API documentation</title>
+    <link rel="stylesheet" href="/docs/styles.css">
+    <script type="module" src="/docs/app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#content">Skip to documentation</a>
+    <header class="topbar">
+      <a class="brand" href="/docs/" aria-label="API documentation home"><span class="brand-mark">R</span><span id="brand-name">API Docs</span></a>
+      <nav aria-label="Primary navigation"><a href="#introduction">Guide</a><a href="/docs/openapi.json" download>OpenAPI</a></nav>
+      <div class="top-actions"><button id="search-button" type="button" aria-label="Search documentation">Search <kbd>⌘K</kbd></button><button id="theme-button" type="button" aria-label="Switch color theme">Theme</button></div>
+    </header>
+    <div class="layout">
+      <aside class="sidebar" aria-label="Endpoint navigation"><nav id="endpoint-nav"><a href="#introduction">Introduction</a></nav></aside>
+      <main id="content" tabindex="-1">
+        <section id="introduction" class="hero"><p class="eyebrow">REST API reference</p><h1 id="api-title">API documentation</h1><p id="api-description">Loading the API specification…</p><div id="metadata"></div></section>
+        <div id="endpoints" aria-live="polite"></div>
+      </main>
+      <aside class="toc" aria-label="On this page"><strong>On this page</strong><nav id="toc-nav"><a href="#introduction">Introduction</a></nav></aside>
+    </div>
+    <dialog id="search-dialog" aria-labelledby="search-title"><div class="search-head"><h2 id="search-title">Search documentation</h2><button id="search-close" aria-label="Close search">×</button></div><input id="search-input" type="search" placeholder="Search endpoints and models" autocomplete="off"><p id="search-status" class="sr-only" aria-live="polite"></p><ul id="search-results"></ul></dialog>
+    <noscript><p class="noscript">JavaScript is required to render endpoint details. The <a href="/docs/openapi.json">OpenAPI specification</a> remains available.</p></noscript>
+  </body>
+</html>
