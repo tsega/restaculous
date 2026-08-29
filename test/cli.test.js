@@ -20,19 +20,126 @@ import {
   validateSettings
 } from "../cli/settings.js";
 import { runWorkflow } from "../cli/workflow.js";
+import { runInit } from "../cli/init.js";
+import {
+  CliUsageError,
+  parseCliArguments,
+  VERSION
+} from "../cli/arguments.js";
 
 const projectDirectory = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   ".."
 );
 
-test("CLI prints guidance when no settings file is provided", () => {
+test("CLI displays help when no command is provided", () => {
   const output = execFileSync(process.execPath, ["app.js"], {
     cwd: projectDirectory,
     encoding: "utf8"
   });
 
-  assert.match(output, /settings\.json file not provided/i);
+  assert.match(output, /Usage:/);
+  assert.match(output, /resta init/);
+});
+
+test("CLI displays help and version flags", () => {
+  const help = execFileSync(process.execPath, ["app.js", "--help"], {
+    cwd: projectDirectory,
+    encoding: "utf8"
+  });
+  const version = execFileSync(process.execPath, ["app.js", "--version"], {
+    cwd: projectDirectory,
+    encoding: "utf8"
+  });
+
+  assert.match(help, /Generate an opinionated Express and Mongoose REST API/);
+  assert.equal(version.trim(), VERSION);
+});
+
+test("package exposes resta with the original command as an alias", async () => {
+  const packageInfo = JSON.parse(
+    await readFile(path.join(projectDirectory, "package.json"), "utf8")
+  );
+
+  assert.equal(packageInfo.bin.resta, "./app.js");
+  assert.equal(packageInfo.bin.restaculous, "./app.js");
+});
+
+test("argument parser supports explicit and legacy generate commands", () => {
+  assert.deepEqual(parseCliArguments(["generate", "settings.json"]), {
+    command: "generate",
+    settingsPath: "settings.json"
+  });
+  assert.deepEqual(parseCliArguments(["settings.json"]), {
+    command: "generate",
+    settingsPath: "settings.json"
+  });
+});
+
+test("argument parser rejects invalid commands and options", () => {
+  assert.throws(
+    () => parseCliArguments(["generate"]),
+    CliUsageError
+  );
+  assert.throws(
+    () => parseCliArguments(["unknown", "value"]),
+    /Unknown command/
+  );
+  assert.throws(
+    () => parseCliArguments(["--unknown"]),
+    CliUsageError
+  );
+});
+
+test("CLI init creates a minimal validated settings file", async (t) => {
+  const fixtureDirectory = await mkdtemp(
+    path.join(tmpdir(), "restaculous-init-test-")
+  );
+  t.after(() => rm(fixtureDirectory, { recursive: true, force: true }));
+
+  const answers = [
+    "Movies API",
+    "",
+    "A generated movie API",
+    "",
+    "",
+    "n",
+    "Movie",
+    "title:String,year:Number",
+    ""
+  ];
+  const result = await runInit({
+    cwd: fixtureDirectory,
+    ask: async () => answers.shift()
+  });
+
+  const contents = JSON.parse(
+    await readFile(path.join(fixtureDirectory, "settings.json"), "utf8")
+  );
+  const settings = validateSettings(contents);
+
+  assert.equal(result.created, true);
+  assert.equal(contents.directory, "./movies-api");
+  assert.equal(settings.models[0].name, "Movie");
+  assert.equal(settings.models[0].attributes[1].type, "Number");
+});
+
+test("CLI init does not overwrite an existing settings file without confirmation", async (t) => {
+  const fixtureDirectory = await mkdtemp(
+    path.join(tmpdir(), "restaculous-init-test-")
+  );
+  t.after(() => rm(fixtureDirectory, { recursive: true, force: true }));
+
+  const settingsPath = path.join(fixtureDirectory, "settings.json");
+  await writeFile(settingsPath, "existing contents\n", "utf8");
+
+  const result = await runInit({
+    cwd: fixtureDirectory,
+    ask: async () => "n"
+  });
+
+  assert.equal(result.created, false);
+  assert.equal(await readFile(settingsPath, "utf8"), "existing contents\n");
 });
 
 test("CLI reports a missing settings file and exits unsuccessfully", () => {

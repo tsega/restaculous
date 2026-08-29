@@ -2,6 +2,33 @@
 
 An opinionated ExpressJs based REST API generator.
 
+## CLI usage
+
+Generate an application with either the explicit command or the original
+settings-file shorthand:
+
+```sh
+resta generate settings.json
+resta settings.json
+```
+
+Create a settings file interactively:
+
+```sh
+resta init
+resta init custom-settings.json
+```
+
+The initializer uses the generator's defaults to keep the resulting file small.
+It will not overwrite an existing file without confirmation.
+
+```sh
+resta --help
+resta --version
+```
+
+The original `restaculous` command remains available as a compatibility alias.
+
 ## CLI development and tests
 
 CLI development requires Node.js 24 or newer. The repository includes an
