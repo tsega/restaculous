@@ -15,6 +15,7 @@ import * as formatter from "./runners/format.js";
 import * as linter from "./runners/lint.js";
 import { HELP, parseCliArguments, VERSION } from "./cli/arguments.js";
 import { runInit } from "./cli/init.js";
+import { createLogger } from "./cli/logger.js";
 import { STATUS } from "./config/index.js";
 import { loadSettings } from "./cli/settings.js";
 import { runWorkflow } from "./cli/workflow.js";
@@ -48,8 +49,10 @@ const completionMessages = {
 };
 
 async function main() {
+  let logger = createLogger();
   try {
     const options = parseCliArguments();
+    logger = createLogger({ verbose: options.verbose });
 
     if (options.command === "help") {
       console.log(HELP.trimEnd());
@@ -60,6 +63,7 @@ async function main() {
       return;
     }
     if (options.command === "init") {
+      logger.debug(`Initializing settings file at "${options.settingsPath}"`);
       const result = await runInit({ settingsPath: options.settingsPath });
       console.log(result.created
         ? chalk.green(`${STATUS.success} Created ${result.path}`)
@@ -67,10 +71,20 @@ async function main() {
       return;
     }
 
+    logger.debug(`Loading settings from "${options.settingsPath}"`);
     const settings = await loadSettings(options.settingsPath);
-    await runWorkflow(settings, services, reportStageComplete);
+    logger.debug(
+      `Generating "${settings.name}" in "${settings.directory}"`
+    );
+    await runWorkflow(
+      settings,
+      services,
+      reportStageComplete,
+      (stage) => logger.debug(`Starting ${stage} stage`)
+    );
   } catch (error) {
     console.error(chalk.red(`${STATUS.error} ${error.message}`));
+    logger.reportError(error);
     if (error.name === "CliUsageError") {
       console.error("Run resta --help for usage.");
     }

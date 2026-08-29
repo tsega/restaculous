@@ -29,6 +29,19 @@ resta --version
 
 The original `restaculous` command remains available as a compatibility alias.
 
+Add `--verbose` to generation or initialization commands when diagnosing a
+problem:
+
+```sh
+resta generate settings.json --verbose
+resta init --verbose
+```
+
+Normal output stays concise. Verbose mode reports settings loading, each
+workflow stage as it starts, and chained error details. The `-v` shorthand is
+reserved for displaying the installed version; use the full `--verbose` flag
+for diagnostics.
+
 ## CLI development and tests
 
 CLI development requires Node.js 24 or newer. The repository includes an

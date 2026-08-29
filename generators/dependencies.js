@@ -1,21 +1,12 @@
-import events from 'events';
-import { exec } from 'child_process';
+import events from "node:events";
 
-const opts = {
-    encoding: 'utf8',
-    maxBuffer: 1024 * 1024 * 10 // 10MB
-};
+import { runCommand } from "../cli/run-command.js";
 
 const workflow = new events.EventEmitter();
 let appSettings = {};
 
-workflow.on('installDependencies', function installDependencies(cb) {
-    exec(`cd ${appSettings.directory} && npm install`, opts, function done(err, stdout, stderr) {
-        if (err) {
-            return cb(err);
-        }
-        cb(null, stdout);
-    });
+workflow.on("installDependencies", function installDependencies(cb) {
+  runCommand("npm", ["install"], { cwd: appSettings.directory }, cb);
 });
 
 export const generate = function generateDependencies(settings, cb) {
